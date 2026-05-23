@@ -26,6 +26,10 @@ st.markdown("""
 *, *::before, *::after {
     font-family: 'IBM Plex Sans', 'Segoe UI', Arial, sans-serif !important;
 }
+/* Ye line Streamlit ke icons ko theek karne ke liye hai */
+span.material-symbols-rounded, i.material-icons, .material-icons {
+    font-family: 'Material Symbols Rounded', 'Material Icons' !important;
+}
 .main .block-container {
     background: #0E1117;
     padding: 1.4rem 1.8rem 3rem 1.8rem;
