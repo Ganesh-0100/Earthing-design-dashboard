@@ -33,18 +33,18 @@ st.markdown("""
 }
 
 [data-testid="stSidebar"] {
-    background: #ffffff;
-    border-right: 1px solid #cde3f4;
+    background: #0E1117; /* Ye dark navy blue background hai */
+    border-right: 1px solid #2c3e50;
 }
 [data-testid="stSidebar"] .block-container { padding: 0.7rem 0.9rem; }
 [data-testid="stSidebar"] label {
-    color: #1a2e40 !important;
+    color: #ffffff !important; /* Text white kar diya taki padhne me aaye */
     font-size: 0.77rem !important;
     font-weight: 500 !important;
 }
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] span,
-[data-testid="stSidebar"] div { color: #2c4a60 !important; }
+[data-testid="stSidebar"] div { color: #d6eaf8 !important; }
 [data-testid="stSidebar"] input {
     background: #eef6fd !important;
     color: #1a2e40 !important;
