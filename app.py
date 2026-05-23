@@ -1,7 +1,12 @@
 """
 Earthing System Design Calculator
-Reference: CBIP Manual Pub.339 (2017), IS 3043:1987, IEEE Std 80-2013
-Based on: GSECL 370 MW CCPP Utran, Surat - ALSTOM / DESEIN calculation
+Phase-wise Calculation with Full Formula Derivation and Engineering Reasoning
+
+Reference Standards:
+  - CBIP Manual Pub.339 (2017): Manual on Earthing of AC Power Systems
+  - IEEE Std 80-2013: Guide for Safety in AC Substation Grounding
+  - IS 3043:1987 (Reaffirmed 2006): Code of Practice for Earthing
+  - IEEE Std 665: Guide for Safety in Generating Station Grounding
 """
 
 import streamlit as st
@@ -21,514 +26,259 @@ st.markdown("""
 *, *::before, *::after {
     font-family: 'IBM Plex Sans', 'Segoe UI', Arial, sans-serif !important;
 }
-
 .main .block-container {
-    background: #f5f6f8;
-    padding: 1.5rem 2rem 3rem 2rem;
-    max-width: 1440px;
+    background: #f4f6f9;
+    padding: 1.4rem 1.8rem 3rem 1.8rem;
+    max-width: 1480px;
 }
 
 [data-testid="stSidebar"] {
-    background: #1c2a3a;
-    border-right: none;
+    background: #ffffff;
+    border-right: 1px solid #cde3f4;
 }
-[data-testid="stSidebar"] .block-container {
-    padding: 0.8rem 1rem;
-}
+[data-testid="stSidebar"] .block-container { padding: 0.7rem 0.9rem; }
 [data-testid="stSidebar"] label {
-    color: #d1dce8 !important;
-    font-size: 0.78rem !important;
+    color: #1a2e40 !important;
+    font-size: 0.77rem !important;
     font-weight: 500 !important;
 }
 [data-testid="stSidebar"] p,
 [data-testid="stSidebar"] span,
-[data-testid="stSidebar"] div {
-    color: #c4d0dc !important;
-}
+[data-testid="stSidebar"] div { color: #2c4a60 !important; }
 [data-testid="stSidebar"] input {
-    background: #243447 !important;
-    color: #e8eef4 !important;
-    border: 1px solid #3a5068 !important;
-    border-radius: 3px !important;
+    background: #eef6fd !important;
+    color: #1a2e40 !important;
+    border: 1px solid #9ecce8 !important;
 }
 [data-testid="stSidebar"] .stSelectbox > div > div {
-    background: #243447 !important;
-    color: #e8eef4 !important;
-    border: 1px solid #3a5068 !important;
+    background: #eef6fd !important;
+    color: #1a2e40 !important;
+    border: 1px solid #9ecce8 !important;
 }
-[data-testid="stSidebar"] .stRadio > div {
-    color: #c4d0dc !important;
-}
-[data-testid="stSidebar"] .stRadio label {
-    color: #c4d0dc !important;
-}
-[data-testid="stSidebar"] .stSlider > div > div {
-    color: #c4d0dc !important;
-}
+[data-testid="stSidebar"] .stRadio label { color: #1a2e40 !important; }
+[data-testid="stSidebar"] small,
 [data-testid="stSidebar"] p[data-testid="stMarkdownContainer"] {
-    color: #8fa8bf !important;
-    font-size: 0.72rem !important;
+    color: #4a7a9b !important;
+    font-size: 0.71rem !important;
+    line-height: 1.5 !important;
 }
 
-.sb-header {
-    background: #0d2d4a;
-    margin: 0 -1rem 1rem -1rem;
-    padding: 1rem 1rem 0.8rem 1rem;
-    border-bottom: 2px solid #1a5276;
+.sb-hdr {
+    background: #2980b9;
+    margin: 0 -0.9rem 0.9rem -0.9rem;
+    padding: 0.9rem;
+    border-bottom: 2px solid #1a6fa0;
 }
-.sb-header-title {
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    margin-bottom: 0.2rem;
-}
-.sb-header-sub {
-    font-size: 0.67rem;
-    color: #88aac4;
-    line-height: 1.5;
-}
-.sb-group {
-    font-size: 0.6rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    color: #5a7a94 !important;
-    padding: 0.9rem 0 0.3rem 0;
-    border-bottom: 1px solid #243447;
-    margin-bottom: 0.5rem;
+.sb-hdr-t { font-size:0.8rem; font-weight:700; color:#ffffff; text-transform:uppercase; letter-spacing:0.05em; }
+.sb-hdr-s { font-size:0.67rem; color:#d6eaf8; margin-top:0.2rem; line-height:1.4; }
+.sb-g {
+    font-size:0.59rem; font-weight:700; text-transform:uppercase; letter-spacing:0.16em;
+    color:#2980b9 !important; padding:0.85rem 0 0.28rem 0;
+    border-bottom:1px solid #cde3f4; margin-bottom:0.45rem;
 }
 
-.page-header {
-    background: #0d2d4a;
-    border-left: 4px solid #b03a2e;
-    padding: 1.2rem 1.6rem;
+.pg-hdr {
+    background: #2980b9;
+    border-left: 4px solid #e74c3c;
+    padding: 1.1rem 1.5rem;
     border-radius: 3px;
-    margin-bottom: 1.4rem;
+    margin-bottom: 1.3rem;
 }
-.page-header-title {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #ffffff;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin: 0;
-}
-.page-header-sub {
-    font-size: 0.72rem;
-    color: #88aac4;
-    margin-top: 0.25rem;
-    line-height: 1.5;
-}
+.pg-hdr-t { font-size:0.98rem; font-weight:700; color:#ffffff; text-transform:uppercase; letter-spacing:0.05em; margin:0; }
+.pg-hdr-s { font-size:0.71rem; color:#d6eaf8; margin-top:0.22rem; line-height:1.5; }
+.pg-hdr-p { font-size:0.77rem; color:#ebf5fb; margin-top:0.4rem; font-weight:500; }
 
 .stTabs [data-baseweb="tab-list"] {
-    background: #ffffff;
-    border-bottom: 2px solid #d8dde5;
-    padding: 0;
-    gap: 0;
+    background:#ffffff; border-bottom:2px solid #9ecce8; padding:0; gap:0;
 }
 .stTabs [data-baseweb="tab"] {
-    font-size: 0.68rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.09em;
-    color: #5a6a7a;
-    padding: 0.65rem 1rem;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -2px;
-    border-radius: 0;
-    background: transparent;
+    font-size:0.67rem; font-weight:600; text-transform:uppercase;
+    letter-spacing:0.09em; color:#4a7a9b; padding:0.62rem 0.9rem;
+    border-bottom:2px solid transparent; margin-bottom:-2px;
+    border-radius:0; background:transparent;
 }
 .stTabs [aria-selected="true"] {
-    color: #0d2d4a;
-    border-bottom: 2px solid #0d2d4a;
-    background: transparent;
+    color:#1a6fa0; border-bottom:2px solid #1a6fa0; background:transparent;
 }
 
-.sec-head {
-    font-size: 0.67rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.13em;
-    color: #0d2d4a;
-    padding-bottom: 0.4rem;
-    border-bottom: 2px solid #0d2d4a;
-    margin-top: 1.4rem;
-    margin-bottom: 0.9rem;
+.sec {
+    font-size:0.66rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:0.13em; color:#1a6fa0; padding-bottom:0.38rem;
+    border-bottom:2px solid #1a6fa0; margin-top:1.3rem; margin-bottom:0.85rem;
 }
 
-.fblock {
-    background: #ffffff;
-    border: 1px solid #d8dde5;
-    border-left: 3px solid #0d2d4a;
-    border-radius: 0 3px 3px 0;
-    padding: 1rem 1.2rem;
-    margin: 0.8rem 0;
-}
-.fblock-formula {
-    font-family: 'IBM Plex Mono', 'Courier New', monospace !important;
-    font-size: 0.84rem;
-    font-weight: 600;
-    color: #0d2d4a;
-    margin-bottom: 0.75rem;
-    line-height: 1.5;
-}
-.fblock-param {
-    font-size: 0.77rem;
-    color: #2c3e50;
-    line-height: 2.0;
-}
-.fblock-param .sym {
-    font-family: 'IBM Plex Mono', monospace;
-    font-weight: 600;
-    color: #154360;
-    display: inline-block;
-    min-width: 130px;
-}
-.fblock-ref {
-    font-size: 0.67rem;
-    color: #5a6a7a;
-    margin-top: 0.6rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid #e8ecf0;
-    font-style: italic;
-}
-.fblock-result {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: #1a5c2a;
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid #e8ecf0;
+.phase-badge {
+    display:inline-block; background:#2980b9; color:#fff;
+    font-size:0.62rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:0.1em; padding:0.22rem 0.7rem; border-radius:2px;
+    margin-bottom:0.6rem;
 }
 
-.res-pass {
-    background: #eafaf1;
-    border: 1px solid #a9dfb5;
-    border-left: 3px solid #1e8449;
-    color: #145a32;
-    padding: 0.75rem 1rem;
-    border-radius: 0 3px 3px 0;
-    font-size: 0.82rem;
-    font-weight: 600;
-    margin: 0.5rem 0;
-    line-height: 1.6;
+.fb {
+    background:#ffffff; border:1px solid #cde3f4;
+    border-left:3px solid #1a6fa0;
+    border-radius:0 3px 3px 0; padding:0.95rem 1.15rem; margin:0.75rem 0;
 }
-.res-fail {
-    background: #fdedec;
-    border: 1px solid #f1a9a0;
-    border-left: 3px solid #c0392b;
-    color: #78281f;
-    padding: 0.75rem 1rem;
-    border-radius: 0 3px 3px 0;
-    font-size: 0.82rem;
-    font-weight: 600;
-    margin: 0.5rem 0;
-    line-height: 1.6;
+.fb-f {
+    font-family:'IBM Plex Mono','Courier New',monospace !important;
+    font-size:0.83rem; font-weight:600; color:#154360;
+    margin-bottom:0.7rem; line-height:1.6;
 }
-.res-note {
-    background: #fef9e7;
-    border: 1px solid #f8c471;
-    border-left: 3px solid #d68910;
-    color: #7d6608;
-    padding: 0.75rem 1rem;
-    border-radius: 0 3px 3px 0;
-    font-size: 0.82rem;
-    font-weight: 600;
-    margin: 0.5rem 0;
-    line-height: 1.6;
+.fb-p { font-size:0.76rem; color:#1a2e40; line-height:2.0; }
+.fb-p b { font-family:'IBM Plex Mono',monospace; font-weight:600; color:#1a6fa0; }
+.fb-why {
+    font-size:0.73rem; color:#154360; background:#d6eaf8;
+    border-left:3px solid #1a6fa0; padding:0.5rem 0.75rem;
+    margin-top:0.65rem; border-radius:0 3px 3px 0; line-height:1.6;
 }
-.res-info {
-    background: #eaf4fb;
-    border: 1px solid #aed6f1;
-    border-left: 3px solid #1a6fa0;
-    color: #154360;
-    padding: 0.65rem 0.9rem;
-    border-radius: 0 3px 3px 0;
-    font-size: 0.77rem;
-    margin: 0.35rem 0;
-    line-height: 1.6;
-    font-weight: 400;
+.fb-ref {
+    font-size:0.66rem; color:#4a7a9b; margin-top:0.55rem;
+    padding-top:0.45rem; border-top:1px solid #d6eaf8; font-style:italic;
+}
+.fb-r {
+    font-family:'IBM Plex Mono',monospace; font-size:0.8rem;
+    font-weight:600; color:#1a5c2a; margin-top:0.48rem;
+    padding-top:0.48rem; border-top:1px solid #d6eaf8;
 }
 
-.dtable {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.79rem;
-    margin: 0.5rem 0;
+.kv-table {
+    background:#ebf5fb; border:1px solid #cde3f4;
+    border-left:3px solid #1a6fa0; border-radius:0 3px 3px 0;
+    padding:0.8rem 1rem; margin:0.6rem 0; font-size:0.76rem;
 }
-.dtable th {
-    background: #0d2d4a;
-    color: #ffffff;
-    padding: 0.45rem 0.75rem;
-    text-align: left;
-    font-size: 0.67rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    white-space: nowrap;
+.kv-table-title {
+    font-size:0.65rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:0.1em; color:#1a6fa0; margin-bottom:0.5rem;
 }
-.dtable td {
-    padding: 0.42rem 0.75rem;
-    border-bottom: 1px solid #e8ecf0;
-    color: #2c3e50;
-    vertical-align: top;
-    line-height: 1.5;
-}
-.dtable tr:hover td { background: #f7f9fc; }
-.dtable .mono {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.78rem;
-    color: #1c2e3e;
-}
-.dtable .pass { color: #1a5c2a; font-weight: 700; }
-.dtable .fail { color: #78281f; font-weight: 700; }
-.dtable .note { color: #7d6608; font-weight: 600; }
-.dtable .hl { background: #eafaf1; }
 
-.mcard-row {
-    display: grid;
-    gap: 0.7rem;
-    margin: 0.8rem 0;
+.r-pass {
+    background:#edf7ee; border:1px solid #a8d5ad; border-left:3px solid #1e7e34;
+    color:#145a32; padding:0.7rem 0.95rem; border-radius:0 3px 3px 0;
+    font-size:0.81rem; font-weight:600; margin:0.45rem 0; line-height:1.6;
 }
-.mcard {
-    background: #ffffff;
-    border: 1px solid #d8dde5;
-    border-radius: 3px;
-    padding: 0.8rem 1rem;
-    text-align: center;
+.r-fail {
+    background:#fdf0f0; border:1px solid #f0a8a8; border-left:3px solid #b92020;
+    color:#7b1818; padding:0.7rem 0.95rem; border-radius:0 3px 3px 0;
+    font-size:0.81rem; font-weight:600; margin:0.45rem 0; line-height:1.6;
 }
-.mcard.pass { border-top: 3px solid #1e8449; }
-.mcard.fail { border-top: 3px solid #c0392b; }
-.mcard.blue { border-top: 3px solid #0d2d4a; }
-.mcard.warn { border-top: 3px solid #d68910; }
-.mcard .mc-label {
-    font-size: 0.62rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: #5a6a7a;
-    font-weight: 700;
-    margin-bottom: 0.3rem;
+.r-note {
+    background:#fdf8ec; border:1px solid #e8c97e; border-left:3px solid #c47c0a;
+    color:#6b4500; padding:0.7rem 0.95rem; border-radius:0 3px 3px 0;
+    font-size:0.81rem; font-weight:600; margin:0.45rem 0; line-height:1.6;
 }
-.mcard .mc-value {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #0d2d4a;
-    font-family: 'IBM Plex Mono', monospace;
-    line-height: 1.2;
+.r-info {
+    background:#d6eaf8; border:1px solid #9ecce8; border-left:3px solid #1a6fa0;
+    color:#154360; padding:0.6rem 0.85rem; border-radius:0 3px 3px 0;
+    font-size:0.75rem; margin:0.3rem 0; line-height:1.62;
 }
-.mcard .mc-unit {
-    font-size: 0.66rem;
-    color: #7a8a9a;
-    margin-top: 0.15rem;
+
+.dt { width:100%; border-collapse:collapse; font-size:0.78rem; margin:0.45rem 0; }
+.dt th {
+    background:#2980b9; color:#ffffff; padding:0.42rem 0.7rem;
+    text-align:left; font-size:0.66rem; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.07em; white-space:nowrap;
 }
+.dt td {
+    padding:0.4rem 0.7rem; border-bottom:1px solid #cde3f4;
+    color:#1a2e40; vertical-align:top; line-height:1.5;
+}
+.dt tr:hover td { background:#ebf5fb; }
+.dt .mn { font-family:'IBM Plex Mono',monospace; font-size:0.77rem; color:#0d2137; }
+.dt .ps { color:#145a32; font-weight:700; }
+.dt .fl { color:#7b1818; font-weight:700; }
+.dt .nt { color:#6b4500; font-weight:600; }
+.dt .hl { background:#d5f5e3; }
+
+.mc-row { display:grid; gap:0.65rem; margin:0.75rem 0; }
+.mc {
+    background:#ffffff; border:1px solid #cde3f4; border-radius:3px;
+    padding:0.75rem 0.95rem; text-align:center;
+}
+.mc.ps { border-top:3px solid #1e7e34; }
+.mc.fl { border-top:3px solid #b92020; }
+.mc.bl { border-top:3px solid #2980b9; }
+.mc.wn { border-top:3px solid #c47c0a; }
+.mc .ml { font-size:0.61rem; text-transform:uppercase; letter-spacing:0.12em; color:#4a7a9b; font-weight:700; margin-bottom:0.28rem; }
+.mc .mv { font-size:1.05rem; font-weight:700; color:#154360; font-family:'IBM Plex Mono',monospace; line-height:1.2; }
+.mc .mu { font-size:0.65rem; color:#7a9aaa; margin-top:0.12rem; }
 
 .card {
-    background: #ffffff;
-    border: 1px solid #d8dde5;
-    border-radius: 3px;
-    padding: 1.2rem 1.4rem;
-    margin-bottom: 0.8rem;
+    background:#ffffff; border:1px solid #cde3f4; border-radius:3px;
+    padding:1.1rem 1.3rem; margin-bottom:0.75rem;
 }
 
-/* Flowchart styles */
-.flow-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1.5rem 1rem;
-    background: #ffffff;
-    border: 1px solid #d8dde5;
-    border-radius: 3px;
-}
-.flow-node {
-    width: 260px;
-    padding: 0.6rem 1rem;
-    border-radius: 3px;
-    text-align: center;
-    font-size: 0.76rem;
-    font-weight: 600;
-    line-height: 1.4;
-    position: relative;
-}
-.flow-node.start-end {
-    background: #0d2d4a;
-    color: #ffffff;
-    border-radius: 20px;
-    width: 180px;
-}
-.flow-node.process {
-    background: #eaf4fb;
-    border: 2px solid #1a6fa0;
-    color: #0d2d4a;
-}
-.flow-node.calc {
-    background: #eafaf1;
-    border: 2px solid #1e8449;
-    color: #145a32;
-}
-.flow-node.decision {
-    background: #fef9e7;
-    border: 2px solid #d68910;
-    color: #7d6608;
-    transform: none;
-    clip-path: polygon(8% 50%, 0% 0%, 92% 0%, 100% 50%, 92% 100%, 0% 100%);
-    border-radius: 0;
-    width: 280px;
-    padding: 0.7rem 2rem;
-}
-.flow-node.remediation {
-    background: #fdedec;
-    border: 2px solid #c0392b;
-    color: #78281f;
-}
-.flow-node .flow-sub {
-    font-size: 0.67rem;
-    font-weight: 400;
-    margin-top: 0.2rem;
-    opacity: 0.85;
-    font-family: 'IBM Plex Mono', monospace;
-}
-.flow-arrow {
-    width: 2px;
-    height: 24px;
-    background: #4a6a84;
-    margin: 0 auto;
-    position: relative;
-}
-.flow-arrow::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 7px solid #4a6a84;
-}
-.flow-label {
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: #4a6a84;
-    text-align: center;
-    margin: 0.1rem 0;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-.flow-branch {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 3rem;
-    width: 100%;
-    margin-top: 0.5rem;
-}
-.flow-branch-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.flow-branch-label {
-    font-size: 0.65rem;
-    font-weight: 700;
-    padding: 0.15rem 0.5rem;
-    border-radius: 2px;
-    margin-bottom: 0.3rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-.flow-branch-label.safe-lbl {
-    background: #1e8449;
-    color: white;
-}
-.flow-branch-label.unsafe-lbl {
-    background: #c0392b;
-    color: white;
-}
-
-#MainMenu, footer, header { display: none; }
-.stDeployButton { display: none; }
+#MainMenu, footer, header { display:none; }
+.stDeployButton { display:none; }
 </style>
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# HELPER FUNCTIONS
+# HELPERS
 # ─────────────────────────────────────────────────────────────────────────────
 
-def sec(title):
-    st.markdown(f'<div class="sec-head">{title}</div>', unsafe_allow_html=True)
+def sec(t):
+    st.markdown(f'<div class="sec">{t}</div>', unsafe_allow_html=True)
 
-def fblock(formula, params, ref, result=None):
-    params_html = "".join(
-        f'<div><span class="sym">{s}</span> = {d}</div>'
-        for s, d in params.items()
-    )
-    result_html = f'<div class="fblock-result">Result : {result}</div>' if result else ""
+def phase(n, t):
+    st.markdown(f'<div class="phase-badge">Phase {n} — {t}</div>', unsafe_allow_html=True)
+
+def fb(formula, params, why, ref, result=None):
+    ph = "".join(f"<div><b>{s}</b> = {d}</div>" for s, d in params.items())
+    rh = f'<div class="fb-r">Calculated Result : {result}</div>' if result else ""
     st.markdown(
-        f'<div class="fblock">'
-        f'<div class="fblock-formula">{formula}</div>'
-        f'<div class="fblock-param">{params_html}</div>'
-        f'<div class="fblock-ref">Reference : {ref}</div>'
-        f'{result_html}</div>',
+        f'<div class="fb"><div class="fb-f">{formula}</div>'
+        f'<div class="fb-p">{ph}</div>'
+        f'<div class="fb-why">Why this formula? {why}</div>'
+        f'<div class="fb-ref">Reference : {ref}</div>{rh}</div>',
         unsafe_allow_html=True
     )
 
-def res_pass(text):
-    st.markdown(f'<div class="res-pass">{text}</div>', unsafe_allow_html=True)
+def known_table(title, rows):
+    r = "".join(f"<tr><td class='mn'>{a}</td><td class='mn'>{b}</td><td style='font-size:0.74rem;color:#1a2e40'>{c}</td><td style='font-size:0.72rem;color:#4a7a9b'>{d}</td></tr>" for a,b,c,d in rows)
+    st.markdown(
+        f'<div class="kv-table"><div class="kv-table-title">{title}</div>'
+        f'<table class="dt"><tr><th>Symbol</th><th>Value</th><th>Meaning</th><th>Source / How obtained</th></tr>{r}</table></div>',
+        unsafe_allow_html=True
+    )
 
-def res_fail(text):
-    st.markdown(f'<div class="res-fail">{text}</div>', unsafe_allow_html=True)
-
-def res_note(text):
-    st.markdown(f'<div class="res-note">{text}</div>', unsafe_allow_html=True)
-
-def info(text):
-    st.markdown(f'<div class="res-info">{text}</div>', unsafe_allow_html=True)
+def rpass(t): st.markdown(f'<div class="r-pass">{t}</div>', unsafe_allow_html=True)
+def rfail(t): st.markdown(f'<div class="r-fail">{t}</div>', unsafe_allow_html=True)
+def rnote(t): st.markdown(f'<div class="r-note">{t}</div>', unsafe_allow_html=True)
+def rinfo(t): st.markdown(f'<div class="r-info">{t}</div>', unsafe_allow_html=True)
 
 def mcards(items, cols=4):
-    html = f'<div class="mcard-row" style="grid-template-columns:repeat({cols},1fr)">'
-    for label, value, unit, style in items:
-        html += (
-            f'<div class="mcard {style}">'
-            f'<div class="mc-label">{label}</div>'
-            f'<div class="mc-value">{value}</div>'
-            f'<div class="mc-unit">{unit}</div>'
-            f'</div>'
-        )
-    html += '</div>'
-    st.markdown(html, unsafe_allow_html=True)
+    h = f'<div class="mc-row" style="grid-template-columns:repeat({cols},1fr)">'
+    for lbl, val, unit, sty in items:
+        h += f'<div class="mc {sty}"><div class="ml">{lbl}</div><div class="mv">{val}</div><div class="mu">{unit}</div></div>'
+    st.markdown(h + '</div>', unsafe_allow_html=True)
 
-def sp(h=0.6):
+def sp(h=0.5):
     st.markdown(f'<div style="height:{h}rem"></div>', unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# MATERIAL CONSTANTS
+# MATERIAL DATA
 # ─────────────────────────────────────────────────────────────────────────────
 
-MATERIALS = {
-    "MS Steel — Welded Joint (recommended for India)": {
-        "rho_r": 15.0, "alpha_r": 0.00423, "SW": 7.86,
-        "SH": 0.114, "Tm": 500.0, "Tr": 20.0, "K": 12.15,
+MATS = {
+    "MS Steel — Welded Joint (Recommended for India)": {
+        "rho_r_v":15.0, "alpha_r":0.00423, "SW":7.86, "SH":0.114,
+        "Tm":500.0, "Tr":20.0, "K":12.15,
     },
     "MS Steel — Bolted Joint": {
-        "rho_r": 15.0, "alpha_r": 0.00423, "SW": 7.86,
-        "SH": 0.114, "Tm": 310.0, "Tr": 20.0, "K": 15.70,
+        "rho_r_v":15.0, "alpha_r":0.00423, "SW":7.86, "SH":0.114,
+        "Tm":310.0, "Tr":20.0, "K":15.70,
     },
     "Copper — Welded Joint": {
-        "rho_r": 1.72, "alpha_r": 0.00393, "SW": 8.89,
-        "SH": 0.094, "Tm": 1084.0, "Tr": 20.0, "K": 4.7,
+        "rho_r_v":1.72, "alpha_r":0.00393, "SW":8.89, "SH":0.094,
+        "Tm":1084.0, "Tr":20.0, "K":4.7,
     },
     "Copper — Bolted Joint": {
-        "rho_r": 1.72, "alpha_r": 0.00393, "SW": 8.89,
-        "SH": 0.094, "Tm": 450.0, "Tr": 20.0, "K": 5.8,
+        "rho_r_v":1.72, "alpha_r":0.00393, "SW":8.89, "SH":0.094,
+        "Tm":450.0, "Tr":20.0, "K":5.8,
     },
 }
 
-STD_DIA = [8, 10, 12, 16, 18, 20, 22, 25, 28, 32, 36, 40]
+STD_DIA = [8,10,12,16,18,20,22,25,28,32,36,40]
 
 # ─────────────────────────────────────────────────────────────────────────────
 # SIDEBAR
@@ -536,120 +286,95 @@ STD_DIA = [8, 10, 12, 16, 18, 20, 22, 25, 28, 32, 36, 40]
 
 with st.sidebar:
     st.markdown("""
-    <div class="sb-header">
-        <div class="sb-header-title">Earthing Design Calculator</div>
-        <div class="sb-header-sub">
-            CBIP Pub.339 (2017) / IEEE Std 80-2013 / IS 3043:1987<br>
-            Enter values below. Calculations update automatically.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    <div class="sb-hdr">
+        <div class="sb-hdr-t">Earthing Design Calculator</div>
+        <div class="sb-hdr-s">CBIP Pub.339 (2017) / IEEE Std 80-2013 / IS 3043:1987<br>
+        Enter your project values. All results update instantly.</div>
+    </div>""", unsafe_allow_html=True)
 
-    st.markdown('<div class="sb-group">Project</div>', unsafe_allow_html=True)
-    project_name = st.text_input("Project Name", "Substation Earthing Design")
-    prepared_by  = st.text_input("Prepared By", "")
-    doc_number   = st.text_input("Document Number", "")
-    voltage      = st.selectbox("System Voltage",
-                   ["11 kV","33 kV","66 kV","110 kV","132 kV","220 kV","400 kV","765 kV"],
-                   index=4)
-    sub_type     = st.selectbox("Substation Type",
-                   ["AIS — Air Insulated Switchgear","GIS — Gas Insulated Switchgear"])
-    neutral      = st.selectbox("Neutral Grounding",
-                   ["Solid Grounded","Resistance Grounded","Unearthed"])
+    st.markdown('<div class="sb-g">Project Information</div>', unsafe_allow_html=True)
+    proj    = st.text_input("Project Name", "Substation Earthing Design")
+    prepby  = st.text_input("Prepared By", "")
+    docno   = st.text_input("Document Number", "")
+    volt    = st.selectbox("System Voltage", ["11 kV","33 kV","66 kV","110 kV","132 kV","220 kV","400 kV","765 kV"], index=4)
+    sbtype  = st.selectbox("Substation Type", ["AIS — Air Insulated Switchgear","GIS — Gas Insulated Switchgear"])
+    neutral = st.selectbox("Neutral Grounding", ["Solid Grounded","Resistance Grounded","Unearthed"])
 
-    st.markdown('<div class="sb-group">Soil Data</div>', unsafe_allow_html=True)
-    rho   = st.number_input("Mean Soil Resistivity — rho (ohm-m)",
-                value=53.0, min_value=0.1, step=1.0,
-                help="Measured by Wenner 4-probe method on site. CBIP Chapter 9.")
-    rho_s = st.number_input("Surface Layer Resistivity — rho_s (ohm-m)",
-                value=3000.0, min_value=1.0, step=100.0,
-                help="Concrete or crushed rock surface layer. CBIP default = 3000 ohm-m.")
-    h_s   = st.number_input("Surface Layer Thickness — hs (m)",
-                value=0.15, min_value=0.001, step=0.01,
-                help="Thickness of the concrete / crushed rock layer above the grid.")
+    st.markdown('<div class="sb-g">Phase 1 — Soil Measurement Data</div>', unsafe_allow_html=True)
+    rho   = st.number_input("Mean Soil Resistivity — rho (ohm-m)", value=53.0, min_value=0.1, step=1.0,
+                help="Measured by Wenner 4-probe method on site. CBIP Chapter 9. Different spacing values are averaged to get the representative value for the full grid depth.")
+    rho_s = st.number_input("Surface Layer Resistivity — rho_s (ohm-m)", value=3000.0, min_value=1.0, step=100.0,
+                help="Resistivity of the crushed rock or concrete layer spread on switchyard surface. CBIP assumes 3000 ohm-m. This layer raises the permissible touch and step voltage limits significantly.")
+    h_s   = st.number_input("Surface Layer Thickness — hs (m)", value=0.15, min_value=0.001, step=0.01,
+                help="Thickness of concrete or crushed rock. A thicker layer gives more benefit but Cs correction reduces the full advantage.")
 
-    st.markdown('<div class="sb-group">Fault Data</div>', unsafe_allow_html=True)
-    If_kA = st.number_input("Earth Fault Current — If (kA)",
-                value=40.0, min_value=0.1, step=0.5,
-                help="Maximum single line-to-earth fault current from system fault study. CBIP Sec 3.7.1.")
-    tf    = st.selectbox("Fault Duration — tf (seconds) [for conductor sizing]",
-                [0.5, 1.0, 2.0, 3.0], index=1,
-                help="CBIP Sec 3.7.3: 1s for digital relays, 3s for EM relays. Maximum fault clearing time including backup protection.")
-    ts    = st.selectbox("Shock Duration — ts (seconds) [for safety voltages]",
-                [0.2, 0.3, 0.5, 1.0], index=2,
-                help="CBIP Sec 3.7.3: 0.5s for digital relays, 1.0s for EM relays. PRIMARY relay clearing time only.")
-    Sf    = st.slider("Current Division Factor — Sf",
-                0.10, 1.00, 0.70, 0.05,
-                help="Fraction of fault current that flows into earth grid. Use Sf = 1.0 if earth wire data is not available. CBIP Sec 3.7.2.")
-    Df    = st.number_input("Decrement Factor — Df",
-                value=1.0, min_value=1.0, max_value=1.5, step=0.01,
-                help="For fault duration >= 0.5s (30 cycles), Df = 1.0 per IEEE 80-2013 Cl.15.10.")
-    Ta    = st.number_input("Ambient Temperature — Ta (deg C)",
-                value=50.0, min_value=10.0, max_value=80.0, step=5.0,
-                help="Initial conductor temperature. Use maximum ambient for conservative design.")
+    st.markdown('<div class="sb-g">Phase 1 — Fault System Data</div>', unsafe_allow_html=True)
+    If_kA = st.number_input("Earth Fault Current — If (kA)", value=40.0, min_value=0.1, step=0.5,
+                help="Maximum single line-to-earth fault current from system short circuit study. This is the most critical input — it determines conductor size and all voltages.")
+    tf    = st.selectbox("Fault Duration for Conductor Sizing — tf (s)", [0.5,1.0,2.0,3.0], index=1,
+                help="Maximum fault clearing time INCLUDING backup protection. CBIP: 1s for digital relays, 3s for EM relays. This is always >= ts.")
+    ts    = st.selectbox("Shock Duration for Safety Voltages — ts (s)", [0.2,0.3,0.5,1.0], index=2,
+                help="Primary relay clearing time only. CBIP: 0.5s for digital relays, 1.0s for EM relays. Always ts <= tf.")
+    Sf    = st.slider("Current Division Factor — Sf", 0.10, 1.00, 0.70, 0.05,
+                help="Fraction of If that flows into the earth grid. Use 1.0 (conservative) if earth wire data is not available. CBIP Sec 3.7.2.")
+    Df    = st.number_input("Decrement Factor — Df", value=1.0, min_value=1.0, max_value=1.5, step=0.01,
+                help="IEEE 80-2013 Cl.15.10: For tf >= 0.5s (30 cycles), Df = 1.0. Accounts for DC offset in initial fault cycles.")
+    Ta    = st.number_input("Ambient Temperature — Ta (deg C)", value=50.0, min_value=10.0, max_value=80.0, step=5.0,
+                help="Initial conductor temperature before fault. Use maximum site ambient for conservative design.")
 
-    st.markdown('<div class="sb-group">Conductor</div>', unsafe_allow_html=True)
-    mat_key = st.selectbox("Conductor Material and Joint Type",
-                list(MATERIALS.keys()), index=0,
-                help="CBIP Sec 3.9: MS Steel recommended for India. Do not mix copper and steel underground.")
-    mat = MATERIALS[mat_key]
+    st.markdown('<div class="sb-g">Phase 2 — Conductor Selection</div>', unsafe_allow_html=True)
+    mat_key = st.selectbox("Conductor Material and Joint Type", list(MATS.keys()), index=0,
+                help="CBIP Sec 3.9: MS Steel is standard in India. Avoid mixing copper and steel underground — galvanic cell causes rapid steel corrosion.")
+    mat = MATS[mat_key]
 
-    st.markdown('<div class="sb-group">Grid Layout</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sb-g">Phase 2 — Grid Geometry</div>', unsafe_allow_html=True)
     Lx  = st.number_input("Grid Length — Lx (m)", value=250.0, min_value=5.0, step=5.0,
-              help="Station dimension along X. Cover the entire fenced area.")
+              help="Station dimension along X. Cover the entire fenced area including control room, DG building. Extend 1-2m outside fence if needed.")
     Ly  = st.number_input("Grid Width — Ly (m)", value=300.0, min_value=5.0, step=5.0)
     D   = st.number_input("Mesh Spacing — D (m)", value=10.0, min_value=0.5, step=0.5,
-              help="CBIP Sec 5.3.5: 3 to 8m typical. Start with 10m and reduce if touch voltage fails.")
-    h   = st.number_input("Burial Depth — h (m)", value=1.0, min_value=0.1, step=0.1,
-              help="Depth of horizontal conductors. CBIP minimum: 0.5 to 0.6m. GSECL used 1.0m.")
-    d_c_mm = st.number_input("Grid Conductor Diameter — dc (mm)", value=32.0,
-              min_value=1.0, step=1.0,
-              help="Use the selected conductor diameter from Step 1.")
-    Lt_manual = st.number_input("Total Buried Conductor Length — Lt (m)",
-              value=11000.0, min_value=10.0, step=100.0,
-              help="Total length from drawings. Includes all horizontal runs. Auto-estimate is approximate only.")
+              help="CBIP Sec 5.3.5: 3 to 8m typical. Smaller D reduces mesh voltage Em. Start with 10m — reduce if Em exceeds Etouch permissible.")
+    h   = st.number_input("Burial Depth of Conductors — h (m)", value=1.0, min_value=0.1, step=0.1,
+              help="CBIP: 0.5m minimum. Greater depth reduces both Km and Ks factors, thus reducing Em and Es.")
+    d_c_mm = st.number_input("Grid Conductor Diameter — dc (mm)", value=32.0, min_value=1.0, step=1.0,
+              help="Use the conductor diameter selected in Phase 2 sizing.")
+    Lt_manual = st.number_input("Total Buried Conductor Length — Lt (m)", value=11000.0, min_value=10.0, step=100.0,
+              help="Enter from your layout drawings. Auto-estimate is approximate. This is the primary grid resistance parameter.")
 
-    st.markdown('<div class="sb-group">Earth Rods</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sb-g">Phase 2 — Ground Rods</div>', unsafe_allow_html=True)
     st.markdown("""
-    <div style="font-size:0.71rem;color:#7a9ab4;padding:0.3rem 0 0.5rem 0;line-height:1.6">
-    Note: Rod quantity may not be known at design start.
-    Option A calculates automatically from perimeter spacing.
-    </div>
-    """, unsafe_allow_html=True)
+    <p style="font-size:0.71rem;color:#4a7a9b;line-height:1.6;padding:0.2rem 0 0.4rem 0">
+    Rod quantity may not be known at design start.
+    Option A calculates it from perimeter length and rod spacing — this is the standard approach.
+    Option B is for when quantity is confirmed from drawings.
+    </p>""", unsafe_allow_html=True)
 
-    rod_method = st.radio(
-        "Rod Quantity — how to determine",
+    rod_method = st.radio("Rod Quantity Method",
         ["Option A: Calculate from perimeter spacing (recommended)",
-         "Option B: Enter number of rods directly"],
-        index=0,
-        help="Option A: Enter spacing; rods are placed at that interval along the perimeter. Option B: Enter exact count from drawings."
-    )
+         "Option B: Enter rod count directly"], index=0)
 
-    L_rod  = st.number_input("Rod Length (m)", value=3.0, min_value=0.5, step=0.5,
-                 help="IS 3043: minimum 3m. Rods must reach moist subsoil. CBIP Sec 5.3.5.1.")
-    d_rod  = st.number_input("Rod Diameter (mm)", value=32.0, min_value=5.0, step=1.0,
-                 help="Same material as grid conductor. 25 to 40mm dia typical for MS rod.")
+    L_rod = st.number_input("Rod Length (m)", value=3.0, min_value=0.5, step=0.5,
+                help="IS 3043: minimum 3m. Must reach moist subsoil. CBIP Sec 5.3.5.1: Rods on periphery are more effective than interior rods.")
+    d_rod = st.number_input("Rod Diameter (mm)", value=32.0, min_value=5.0, step=1.0,
+                help="Same material as grid conductor. Same material mandatory — mixing causes galvanic corrosion.")
 
     if "Option A" in rod_method:
-        rod_spacing_peri = st.number_input(
-            "Rod Spacing Along Perimeter (m)",
-            value=10.0, min_value=1.0, step=1.0,
-            help="One rod placed every X metres along the grid perimeter. Example: 10m spacing on 1100m perimeter gives 110 rods."
-        )
-        N_rods_calc = True
+        rod_sp_peri = st.number_input("Spacing Between Rods Along Perimeter (m)", value=12.0, min_value=1.0, step=1.0,
+                help="One rod is placed every X metres along the grid perimeter. Place rods at corners as priority. Example: 90 rods on 1100m perimeter gives approximately 12m spacing.")
+        N_rods_auto = True
     else:
-        N_rods_input = st.number_input("Number of Ground Rods", value=90, min_value=0, step=1)
-        N_rods_calc  = False
+        N_rods_manual = st.number_input("Number of Ground Rods", value=90, min_value=0, step=1)
+        N_rods_auto = False
 
-    rod_spacing_check = st.number_input(
-        "Rod-to-Rod Spacing — utilization check (m)",
-        value=3.0, min_value=0.1, step=0.5,
-        help="Average spacing between adjacent rods. CBIP Sec 5.3.5.1: spacing should be >= rod length for full utilization."
-    )
+    rod_sp_check = st.number_input("Rod-to-Rod Spacing for Utilization Check (m)", value=3.0, min_value=0.1, step=0.5,
+                help="Used to compute utilization factor eta. CBIP: spacing >= rod length gives full utilization (eta=1.0).")
 
-    st.markdown('<div class="sb-group">Earth Pits (separate from grid)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sb-g">Phase 2 — Separate Earth Pits</div>', unsafe_allow_html=True)
     N_pits = st.number_input("Number of Separate Earth Pits", value=56, min_value=0, step=1,
-                 help="Separate pipe or plate electrodes connected outside the main grid. As used in GSECL calculation.")
+                help="Separate pipe or plate electrodes connected outside the main grid. Their resistance Re is calculated separately and then combined with Rg in parallel.")
+    d_pit_cm = st.number_input("Earth Pit Diameter (cm)", value=3.2, min_value=0.5, step=0.1,
+                help="Outer diameter of the pipe or rod used for each earth pit. Example: 3.2 cm diameter pipe electrode.")
+    L_pit_cm = st.number_input("Earth Pit Length (cm)", value=300.0, min_value=10.0, step=10.0,
+                help="Length of electrode from ground surface. Example: 300 cm = 3.0 m long electrode.")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CALCULATIONS
@@ -661,7 +386,7 @@ ts_val  = float(ts)
 d_c     = d_c_mm / 1000.0
 d_rod_m = d_rod / 1000.0
 
-rho_r   = mat["rho_r"]
+rho_r   = mat["rho_r_v"]
 alpha_r = mat["alpha_r"]
 SW      = mat["SW"]
 SH      = mat["SH"]
@@ -675,107 +400,104 @@ ln_arg  = 1.0 + (Tm - Ta) / (K0 + Ta)
 ln_val  = math.log(ln_arg)
 numer   = tf_val * alpha_r * rho_r * 1e4 / Tcap
 A_ieee  = If_kA * math.sqrt(numer / ln_val)
+r_calc  = math.sqrt(A_ieee / math.pi)
+d_calc  = 2.0 * r_calc
 
-r_calc         = math.sqrt(A_ieee / math.pi)
-d_calc_mm      = 2.0 * r_calc
+if rho <= 25:   corr_cls, corr_mm, min_a = "Corrosive / Severely Corrosive",    4.5,  200
+elif rho <= 100: corr_cls, corr_mm, min_a = "Mildly / Moderately Corrosive",    2.25, 100
+else:            corr_cls, corr_mm, min_a = "Very Mildly Corrosive",             0.75, 100
 
-if rho <= 25:
-    corr_class, corr_thk = "Corrosive / Severely Corrosive", 4.5
-    min_area = 200
-elif rho <= 100:
-    corr_class, corr_thk = "Mildly / Moderately Corrosive", 2.25
-    min_area = 100
+d_corr  = d_calc + corr_mm
+A_corr  = math.pi * (d_corr/2.0)**2
+A_final = max(A_corr, float(min_a))
+sel_dia = next((d for d in STD_DIA if math.pi*(d/2.0)**2 >= A_final), STD_DIA[-1])
+sel_area= math.pi * (sel_dia/2.0)**2
+A_cbip  = K_cbip * If_A * math.sqrt(tf_val) * 1e-3
+
+A_grid  = Lx * Ly
+Lp      = 2.0*(Lx+Ly)
+Dm      = math.sqrt(Lx**2+Ly**2)
+n_x     = int(Lx/D)+1
+n_y     = int(Ly/D)+1
+Lc_est  = n_x*Ly + n_y*Lx
+
+if N_rods_auto:
+    N_rods = max(1, int(math.ceil(Lp/rod_sp_peri)))
 else:
-    corr_class, corr_thk = "Very Mildly Corrosive", 0.75
-    min_area = 100
+    N_rods = int(N_rods_manual)
 
-d_with_corr = d_calc_mm + corr_thk
-A_with_corr = math.pi * (d_with_corr / 2.0) ** 2
-A_final     = max(A_with_corr, float(min_area))
-sel_dia     = next((d for d in STD_DIA if math.pi*(d/2.0)**2 >= A_final), STD_DIA[-1])
-sel_area    = math.pi * (sel_dia / 2.0) ** 2
+Lr   = N_rods * L_rod
+Lt   = Lt_manual
+Lc   = Lt - Lr
 
-A_grid = Lx * Ly
-Lp     = 2.0 * (Lx + Ly)
-Dm     = math.sqrt(Lx**2 + Ly**2)
-n_x    = int(Lx / D) + 1
-n_y    = int(Ly / D) + 1
-Lc_est = n_x * Ly + n_y * Lx
+r_eta = rod_sp_check / L_rod
+if r_eta>=2.0:   eta, eta_d = 1.00, "Full utilization — no mutual interference between rods"
+elif r_eta>=1.0: eta, eta_d = 0.87, "Minor mutual interference between adjacent rods"
+elif r_eta>=0.6: eta, eta_d = 0.75, "Moderate interference — rods too close together"
+else:            eta, eta_d = 0.60, "Heavy interference — increase rod spacing to >= rod length"
 
-if N_rods_calc:
-    N_rods = max(1, int(math.ceil(Lp / rod_spacing_peri)))
-else:
-    N_rods = int(N_rods_input)
+s20A  = math.sqrt(20.0*A_grid)
+s20_A = math.sqrt(20.0/A_grid)
+Rg    = rho*(1.0/Lt + (1.0/s20A)*(1.0+1.0/(1.0+h*s20_A)))
 
-Lr  = N_rods * L_rod
-Lt  = Lt_manual
-Lc  = Lt - Lr
+Lcm   = L_rod*100.0
+d_rcm = d_rod
+rho_c = rho*100.0
+Re_rod_single = (100.0*rho_c)/(2.0*math.pi*Lcm) * math.log(4.0*Lcm/d_rcm)
+Re_grid_rods  = Re_rod_single / N_rods
 
-ratio_rod = rod_spacing_check / L_rod
-if ratio_rod >= 2.0:   eta, eta_desc = 1.00, "Full utilization (spacing >= 2 x rod length)"
-elif ratio_rod >= 1.0: eta, eta_desc = 0.87, "Minor mutual interference"
-elif ratio_rod >= 0.6: eta, eta_desc = 0.75, "Moderate mutual interference"
-else:                  eta, eta_desc = 0.60, "Heavy mutual interference — increase rod spacing"
-
-sqrt_20A  = math.sqrt(20.0 * A_grid)
-sqrt_20_A = math.sqrt(20.0 / A_grid)
-Rg = rho * (1.0/Lt + (1.0/sqrt_20A) * (1.0 + 1.0/(1.0 + h * sqrt_20_A)))
-
-L_cm   = L_rod * 100.0
-d_cm   = d_rod
-rho_cm = rho * 100.0
 if N_pits > 0:
-    Re_single_pit = (100.0 * rho_cm) / (2.0 * math.pi * L_cm) * math.log(4.0 * L_cm / d_cm)
-    Re_pits = Re_single_pit / N_pits
-    Rcomb   = (Rg * Re_pits) / (Rg + Re_pits)
+    Re_pit_single = (100.0*rho_c)/(2.0*math.pi*L_pit_cm) * math.log(4.0*L_pit_cm/d_pit_cm)
+    Re_pits       = Re_pit_single / N_pits
+    Rcomb         = (Rg*Re_pits)/(Rg+Re_pits)
+    has_pits      = True
 else:
     Re_pits = None
     Rcomb   = Rg
+    has_pits = False
 
 IG    = If_A * Sf * Df
-IG_kA = IG / 1000.0
+IG_kA = IG/1000.0
 GPR   = IG * Rg
 
-Cs = 1.0 - ((0.09 * (1.0 - rho/rho_s)) / (2.0*h_s + 0.09))
+Cs = 1.0 - ((0.09*(1.0-rho/rho_s))/(2.0*h_s+0.09))
 Cs = max(0.01, min(1.0, Cs))
 
 Ib         = 0.116 / math.sqrt(ts_val)
-Etouch     = Ib * (1000.0 + 1.5 * rho_s * Cs)
-Estep_perm = Ib * (1000.0 + 6.0  * rho_s * Cs)
-Et_bare    = Ib * (1000.0 + 1.5 * rho)
-Es_bare    = Ib * (1000.0 + 6.0  * rho)
+Etouch     = Ib * (1000.0 + 1.5*rho_s*Cs)
+Estep_perm = Ib * (1000.0 + 6.0*rho_s*Cs)
+Et_bare    = Ib * (1000.0 + 1.5*rho)
+Es_bare    = Ib * (1000.0 + 6.0*rho)
 
-na  = 2.0 * Lc / Lp
-nb  = (Lp / (4.0 * math.sqrt(A_grid))) ** 0.5
-n   = na * nb
-Kh  = math.sqrt(1.0 + h)
+na  = 2.0*Lc/Lp
+nb  = (Lp/(4.0*math.sqrt(A_grid)))**0.5
+n   = na*nb
+Kh  = math.sqrt(1.0+h)
 Kii = 1.0
-Kim = 0.644 + 0.148 * n
+Kim = 0.644 + 0.148*n
 Kis = Kim
 
 try:
-    t1  = D**2 / (16.0 * h * d_c)
-    t2  = (D + 2.0*h)**2 / (8.0 * D * d_c)
-    t3  = h / (4.0 * d_c)
-    t4  = (Kii/Kh) * math.log(8.0 / (math.pi * (2.0*n - 1.0)))
-    Km  = (1.0 / (2.0*math.pi)) * (math.log(t1 + t2 - t3) + t4)
+    t1  = D**2/(16.0*h*d_c)
+    t2  = (D+2.0*h)**2/(8.0*D*d_c)
+    t3  = h/(4.0*d_c)
+    t4  = (Kii/Kh)*math.log(8.0/(math.pi*(2.0*n-1.0)))
+    Km  = (1.0/(2.0*math.pi))*(math.log(t1+t2-t3)+t4)
     Km  = max(0.05, min(6.0, Km))
 except:
     Km = 0.5
 
 try:
-    Ks = (1.0/math.pi) * (
-        1.0/(2.0*h) + 1.0/(D+h) + (1.0/D)*(1.0 - 0.5**(n - 2.0))
-    )
+    Ks = (1.0/math.pi)*(1.0/(2.0*h)+1.0/(D+h)+(1.0/D)*(1.0-0.5**(n-2.0)))
     Ks = max(0.01, min(6.0, Ks))
 except:
     Ks = 0.2
 
-Lm = Lc + (1.55 + 1.22*(L_rod/Dm)) * Lr
+Lm = Lc + (1.55+1.22*(L_rod/Dm))*Lr
 Ls = 0.75*Lc + 0.85*Lr
 
-Em = (rho * Km * Kim * IG) / Lm
-Es = (rho * Ks * Kis * IG) / Ls
+Em = (rho*Km*Kim*IG)/Lm
+Es = (rho*Ks*Kis*IG)/Ls
 
 touch_ok = Em <= Etouch
 step_ok  = Es <= Estep_perm
@@ -786,947 +508,1117 @@ all_safe = touch_ok and step_ok
 # PAGE HEADER
 # ─────────────────────────────────────────────────────────────────────────────
 
-hdr_sub  = "CBIP Pub.339 (2017)  |  IS 3043:1987 (Reaffirmed 2006)  |  IEEE Std 80-2013  |  IS 2309  |  IEEE 665"
-hdr_proj = f"Project : {project_name}"
-if prepared_by: hdr_proj += f"   |   Prepared by : {prepared_by}"
-if doc_number:  hdr_proj += f"   |   Doc No : {doc_number}"
-hdr_proj += f"   |   {voltage}   |   {sub_type.split(' — ')[0]}"
+h_sub  = "CBIP Pub.339 (2017)  |  IS 3043:1987 (Reaffirmed 2006)  |  IEEE Std 80-2013  |  IS 2309  |  IEEE Std 665"
+h_proj = f"Project: {proj}"
+if prepby:  h_proj += f"  |  Prepared by: {prepby}"
+if docno:   h_proj += f"  |  Doc No: {docno}"
+h_proj += f"  |  {volt}  |  {sbtype.split(' — ')[0]}"
 
 st.markdown(f"""
-<div class="page-header">
-    <div class="page-header-title">Earthing System Design Calculation</div>
-    <div class="page-header-sub">{hdr_sub}</div>
-    <div class="page-header-sub" style="color:#b8ceda;margin-top:0.3rem">{hdr_proj}</div>
-</div>
-""", unsafe_allow_html=True)
+<div class="pg-hdr">
+    <div class="pg-hdr-t">Earthing System Design Calculation — Phase-wise</div>
+    <div class="pg-hdr-s">{h_sub}</div>
+    <div class="pg-hdr-p">{h_proj}</div>
+</div>""", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # TABS
 # ─────────────────────────────────────────────────────────────────────────────
 
-t0, tflow, t1, t2, t3, t4, t5, t6 = st.tabs([
-    "Design Basis",
-    "Design Algorithm",
-    "Step 1 — Conductor Sizing",
-    "Step 2 — Grid Resistance",
-    "Step 3 — Grid Current and GPR",
-    "Step 4 — Safety Voltage Limits",
-    "Step 5 — Mesh and Step Voltage",
-    "Step 6 — Final Assessment",
+tabs = st.tabs([
+    "Overview and Drawing",
+    "Algorithm",
+    "Phase 1 — Inputs",
+    "Phase 2 — Conductor Sizing",
+    "Phase 3 — Safety Limits",
+    "Phase 4 — Resistance and GPR",
+    "Phase 5 — Verification",
+    "Final Assessment",
 ])
+t_ov, t_alg, t_p1, t_p2, t_p3, t_p4, t_p5, t_fa = tabs
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# TAB 0 — DESIGN BASIS
+# OVERVIEW AND DRAWING
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-with t0:
-    col1, col2 = st.columns([1, 1], gap="large")
-
+with t_ov:
+    col1, col2 = st.columns([1,1], gap="large")
     with col1:
-        sec("1.0 Introduction — Purpose of Earthing System")
+        sec("What is an Earthing System and Why Does It Matter?")
         st.markdown("""
-        <div class="card" style="font-size:0.82rem;color:#2c3e50;line-height:1.85">
-        The primary requirements of a good earthing system in a substation are:<br><br>
-        <b>1.</b> It shall stabilize circuit potentials with respect to ground and limit the overall potential rise.<br>
-        <b>2.</b> It shall protect life and property from dangerous over-voltages.<br>
-        <b>3.</b> It shall provide a low impedance path for fault currents to ensure prompt and consistent
+        <div class="card" style="font-size:0.81rem;color:#1a2e40;line-height:1.85">
+        When a phase conductor touches the metal body of a transformer, circuit breaker,
+        or any grounded structure, a fault current of tens of thousands of amperes flows.
+        This current must reach the earth and return to the source. The earthing system
+        provides that path.<br><br>
+        Without a properly designed earthing system, the metal structures in the switchyard
+        rise to dangerous voltages relative to the ground surface. A person touching equipment
+        (touch voltage) or simply standing near the fault area (step voltage) could receive
+        a fatal electric shock.<br><br>
+        The four primary requirements per CBIP Pub.339 are:<br><br>
+        <b>1.</b> Stabilize circuit potentials with respect to ground and limit the overall potential rise.<br>
+        <b>2.</b> Protect life and property from dangerous over-voltages.<br>
+        <b>3.</b> Provide a low impedance path for fault currents to ensure prompt and consistent
         operation of protective devices during ground faults.<br>
-        <b>4.</b> It shall keep the maximum voltage gradient along the surface, inside and around the
+        <b>4.</b> Keep the maximum voltage gradient along the surface, inside and around the
         substation, within safe limits during ground faults.
-        </div>
-        """, unsafe_allow_html=True)
+        </div>""", unsafe_allow_html=True)
 
-        sec("2.1 Codes and Standards")
-        st.markdown("""<table class="dtable">
-        <tr><th>Standard</th><th>Description</th><th>Application</th></tr>
-        <tr><td class="mono">CBIP Pub.339 (2017)</td><td>Manual on Earthing of AC Power Systems</td><td>Primary reference</td></tr>
-        <tr><td class="mono">IS 3043:1987</td><td>Code of Practice for Earthing (Reaffirmed 2006)</td><td>Material sizing, installation</td></tr>
-        <tr><td class="mono">IEEE Std 80-2013</td><td>Guide for Safety in AC Substation Grounding</td><td>Design formulae</td></tr>
-        <tr><td class="mono">IEEE Std 665</td><td>Guide for Safety in Generating Station Grounding</td><td>Generating station specifics</td></tr>
-        <tr><td class="mono">IS 2309</td><td>Protection of Buildings against Lightning</td><td>Lightning earthing</td></tr>
-        <tr><td class="mono">IEC 62305</td><td>Protection against Lightning</td><td>Lightning protection</td></tr>
-        </table>""", unsafe_allow_html=True)
+        sec("How a Switchyard Earthing Drawing Works")
+        st.markdown("""
+        <div class="card" style="font-size:0.81rem;color:#1a2e40;line-height:1.85">
+        A switchyard earthing drawing typically has two parts:<br><br>
+        <b>Part A — The Main Grid (Top View, Plan):</b><br>
+        This is the bird's eye view of the switchyard showing the buried MS rod grid.
+        The grid is a mesh of conductors buried below the surface, running parallel to
+        equipment rows. It covers the entire fenced switchyard area including transformer
+        bays, bus tie bays, bus coupler bays, line bays, and future expansion areas.<br><br>
+        <b>Part B — Equipment-Specific Earthing Details:</b><br>
+        Each type of equipment has its own standardized earthing connection detail.<br>
+        - CVT (Capacitor Voltage Transformer) earthing connection<br>
+        - CT (Current Transformer) earthing connection<br>
+        - LA (Lightning Arrester) — shortest possible lead, no bends, minimum inductance<br>
+        - Wave Trap earthing<br>
+        - Lightning Mast — dedicated down conductor to grid<br>
+        - Isolator and Circuit Breaker earthing (with and without earth switch)<br>
+        - Tower earthing details<br>
+        - Auxiliary Earthmat: A dense sub-grid placed directly below the operator standing
+          area near equipment operating handles to locally reduce step and touch voltage.
+        </div>""", unsafe_allow_html=True)
 
-        sec("Soil Corrosiveness Classification — CBIP Table 3.7")
-        st.markdown(f"""<table class="dtable">
-        <tr><th>Soil Resistivity (ohm-m)</th><th>Class</th><th>Corrosion Allowance</th></tr>
-        <tr {'class="hl"' if rho <= 10 else ''}><td class="mono">Less than 10</td><td>Severely Corrosive</td><td>30% area, +4.5mm dia</td></tr>
-        <tr {'class="hl"' if 10 < rho <= 25 else ''}><td class="mono">10 to 25</td><td>Corrosive</td><td>30% area, +4.5mm dia</td></tr>
-        <tr {'class="hl"' if 25 < rho <= 50 else ''}><td class="mono">25 to 50</td><td>Moderately Corrosive</td><td>15% area, +2.25mm dia</td></tr>
-        <tr {'class="hl"' if 50 < rho <= 100 else ''}><td class="mono">50 to 100</td><td>Mildly Corrosive</td><td>15% area, +2.25mm dia</td></tr>
-        <tr {'class="hl"' if rho > 100 else ''}><td class="mono">Greater than 100</td><td>Very Mildly Corrosive</td><td>10% area, +0.75mm dia</td></tr>
-        </table>
-        <p style="font-size:0.74rem;color:#5a6a7a;margin-top:0.4rem">
-        Your input: rho = {rho} ohm-m — <b>{corr_class}</b>.
-        Corrosion addition to diameter = {corr_thk} mm. Source: CBIP Table 3.9
-        </p>""", unsafe_allow_html=True)
+        sec("What is an Auxiliary Earthmat and Why is it Used?")
+        st.markdown("""
+        <div class="card" style="font-size:0.81rem;color:#1a2e40;line-height:1.85">
+        The main grid provides general protection across the switchyard. However, near
+        equipment like isolators and circuit breakers, an operator stands at a fixed
+        location to perform switching operations.<br><br>
+        At that specific spot, the touch or step voltage from the main grid alone may
+        still be locally higher than safe. The auxiliary earthmat solves this.<br><br>
+        <b>How it works:</b> A small, dense grid (typically 1.5m x 1.5m to 2m x 2m)
+        of closely spaced MS conductors is buried just below the surface (0.1 to 0.2m depth)
+        at the operator's standing position. This dense sub-grid equalizes the potential
+        at the operator's feet, reducing the step voltage to nearly zero. It also brings
+        the equipment frame and the operator's feet to the same potential, reducing touch voltage.<br><br>
+        Auxiliary earthmats at all manual operating locations are mandatory per CBIP Sec 5.3.5
+        and IS 3043.
+        </div>""", unsafe_allow_html=True)
 
     with col2:
-        sec("2.2 Design Input Data")
-        st.markdown(f"""<table class="dtable">
-        <tr><th>Parameter</th><th>Value</th><th>Remark / Source</th></tr>
-        <tr><td>Earth Fault Current — If</td><td class="mono">{If_kA} kA</td><td>From system fault study</td></tr>
-        <tr><td>Fault Duration — tf</td><td class="mono">{tf_val} s</td><td>CBIP Sec 3.7.3 — incl. backup clearing</td></tr>
-        <tr><td>Shock Duration — ts</td><td class="mono">{ts_val} s</td><td>CBIP Sec 3.7.3 — primary relay only</td></tr>
-        <tr><td>Current Division Factor — Sf</td><td class="mono">{Sf}</td><td>CBIP Sec 3.7.2 — fraction into grid</td></tr>
-        <tr><td>Decrement Factor — Df</td><td class="mono">{Df}</td><td>IEEE 80-2013 Cl.15.10</td></tr>
-        <tr><td>Ambient Temperature — Ta</td><td class="mono">{Ta} deg C</td><td>Maximum site ambient</td></tr>
-        <tr><td>Mean Soil Resistivity — rho</td><td class="mono">{rho} ohm-m</td><td>Wenner measurement, CBIP Ch.9</td></tr>
-        <tr><td>Surface Layer Resistivity — rho_s</td><td class="mono">{rho_s} ohm-m</td><td>Concrete / crushed rock</td></tr>
-        <tr><td>Surface Layer Thickness — hs</td><td class="mono">{h_s} m</td><td>As per site specification</td></tr>
-        <tr><td>Conductor Material</td><td class="mono">{mat_key.split(" (")[0]}</td><td>CBIP Sec 3.9</td></tr>
-        <tr><td>Grid Area — Lx x Ly</td><td class="mono">{Lx:.0f} m x {Ly:.0f} m = {A_grid:.0f} m2</td><td>Station layout drawings</td></tr>
-        <tr><td>Mesh Spacing — D</td><td class="mono">{D} m</td><td>CBIP: 3 to 8m typical</td></tr>
-        <tr><td>Burial Depth — h</td><td class="mono">{h} m</td><td>CBIP: 0.5m minimum</td></tr>
-        <tr><td>Total Buried Conductor — Lt</td><td class="mono">{Lt:.0f} m</td><td>From detailed layout drawings</td></tr>
-        <tr><td>Ground Rods</td><td class="mono">{N_rods} nos x {L_rod} m x {d_rod:.0f} mm dia</td>
-            <td>{"Calculated from " + str(rod_spacing_peri) + "m perimeter spacing" if N_rods_calc else "Entered from drawings"}</td></tr>
-        <tr><td>Separate Earth Pits</td><td class="mono">{N_pits} nos</td><td>IS 3043 — additional electrode</td></tr>
-        <tr><td>Earthing Resistance Target</td><td class="mono">Less than 1.0 ohm</td><td>Technical specification</td></tr>
+        sec("How the Drawing Connects to the Calculation")
+        st.markdown(f"""<table class="dt">
+        <tr><th>Drawing Element</th><th>Calculation Parameter</th><th>Reference Value</th><th>Where Used</th></tr>
+        <tr><td>MS rod grid — horizontal conductors</td><td class="mn">Lc (m)</td><td class="mn">approx 11000 m</td><td>Grid resistance Rg, Em, Es</td></tr>
+        <tr><td>Ground rods at grid junctions</td><td class="mn">Lr = N x L (m)</td><td class="mn">90 x 3 = 270 m</td><td>Lt, Rg, Lm, Ls</td></tr>
+        <tr><td>Total buried conductor</td><td class="mn">Lt = Lc + Lr (m)</td><td class="mn">11270 m</td><td>Rg formula</td></tr>
+        <tr><td>Separate earth pits (pipe electrodes)</td><td class="mn">Re (ohm)</td><td class="mn">56 pits, 3m deep</td><td>Combined Rcomb</td></tr>
+        <tr><td>Grid plan dimensions</td><td class="mn">Lx x Ly (m)</td><td class="mn">250 x 300 m</td><td>Area A, Rg, Lp, Dm</td></tr>
+        <tr><td>Mesh spacing between parallel conductors</td><td class="mn">D (m)</td><td class="mn">approx 10 m</td><td>Km, Ks, Em, Es</td></tr>
+        <tr><td>Burial depth of horizontal conductors</td><td class="mn">h (m)</td><td class="mn">1.0 m</td><td>Rg, Kh, Km, Ks</td></tr>
+        <tr><td>MS rod diameter</td><td class="mn">dc (m)</td><td class="mn">0.032 m (32 mm)</td><td>Km formula</td></tr>
+        <tr><td>Concrete surface layer</td><td class="mn">rho_s, hs</td><td class="mn">3000 ohm-m, 0.15 m</td><td>Cs, Etouch, Estep</td></tr>
+        <tr><td>LA earthing — short lead, no bends</td><td class="mn">Low inductance path</td><td class="mn">Less than 1m</td><td>Impulse impedance check</td></tr>
+        <tr><td>Transformer neutral connection</td><td class="mn">Full IG carrying conductor</td><td class="mn">Sized for IG</td><td>Conductor sizing formula</td></tr>
+        <tr><td>Auxiliary earthmat at operator positions</td><td class="mn">Local step/touch reduction</td><td class="mn">At all manual switches</td><td>CBIP Sec 5.3.5</td></tr>
         </table>""", unsafe_allow_html=True)
 
-        if N_rods_calc:
-            sp()
-            info(f"Ground rod quantity auto-calculated: Grid perimeter = {Lp:.0f} m. "
-                 f"At one rod per {rod_spacing_peri} m: N = ceil({Lp:.0f} / {rod_spacing_peri}) = {N_rods} rods. "
-                 f"Total rod length Lr = {N_rods} x {L_rod} = {Lr:.0f} m.")
+        sec("Typical Bill of Quantities for a Large Switchyard Earthing System")
+        st.markdown("""<table class="dt">
+        <tr><th>Item</th><th>Description</th><th>Typical Quantity</th><th>Unit</th></tr>
+        <tr><td>1</td><td>Main earthmat — 25mm dia MS rod</td><td class="mn">6000 to 7000</td><td>Mtrs</td></tr>
+        <tr><td>2</td><td>Auxiliary earthmat — 20mm dia MS rod</td><td class="mn">1000 to 1500</td><td>Mtrs</td></tr>
+        <tr><td>3</td><td>Risers — 50mm dia MS rod</td><td class="mn">12000 to 16000</td><td>Mtrs</td></tr>
+        <tr><td>4</td><td>75x6 GI Flat</td><td class="mn">2000 to 3000</td><td>Mtrs</td></tr>
+        <tr><td>5</td><td>50x6 GI Flat</td><td class="mn">1500 to 2000</td><td>Mtrs</td></tr>
+        <tr><td>6</td><td>Rod electrodes for earthing</td><td class="mn">40 to 50</td><td>Nos</td></tr>
+        <tr><td>7</td><td>Rod electrodes for lightning protection</td><td class="mn">4 to 6</td><td>Nos</td></tr>
+        <tr><td>8</td><td>Pipe electrodes with treated pits</td><td class="mn">50 to 80</td><td>Nos</td></tr>
+        <tr><td>9</td><td>Interconnecting wire / module wire</td><td class="mn">700 to 900</td><td>Mtrs</td></tr>
+        </table>""", unsafe_allow_html=True)
+
+        sec("Codes and Standards Referenced")
+        st.markdown("""<table class="dt">
+        <tr><th>Standard</th><th>Description</th><th>Application in This Tool</th></tr>
+        <tr><td class="mn">CBIP Pub.339 (2017)</td><td>Manual on Earthing of AC Power Systems</td><td>Primary reference — all formulae and design philosophy</td></tr>
+        <tr><td class="mn">IEEE Std 80-2013</td><td>Guide for Safety in AC Substation Grounding</td><td>Full thermal formula, geometric factors, Cs formula</td></tr>
+        <tr><td class="mn">IS 3043:1987</td><td>Code of Practice for Earthing (Reaffirmed 2006)</td><td>Minimum sizes, material, installation requirements</td></tr>
+        <tr><td class="mn">IEEE Std 665</td><td>Guide for Safety in Generating Station Grounding</td><td>Grid resistance formula (Rg) — Sverak equation</td></tr>
+        <tr><td class="mn">IS 2309</td><td>Protection of Buildings against Lightning</td><td>Lightning down conductors, mast earthing</td></tr>
+        <tr><td class="mn">IEC 62305</td><td>Protection against Lightning</td><td>Impulse impedance concept for LA earthing</td></tr>
+        <tr><td class="mn">BS 7430:2011</td><td>Code of Practice for Protective Earthing</td><td>Surface current density formula (Isd)</td></tr>
+        </table>""", unsafe_allow_html=True)
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# TAB FLOW — DESIGN ALGORITHM FLOWCHART
+# ALGORITHM TAB
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-with tflow:
-    sec("Design Algorithm — Step by Step Flow (CBIP Pub.339 / IEEE Std 80-2013)")
-    info("This flowchart shows the exact sequence of calculations performed in this tool. Each step corresponds to one tab. Read top to bottom. If the safety check fails, adjust the design parameters and re-run.")
+with t_alg:
+    sec("Design Algorithm — Step-by-Step Sequence (CBIP Pub.339 / IEEE Std 80-2013)")
+    rinfo("This algorithm is the sequence of calculations this tool performs. Each step corresponds to one tab. The safety check (Step 10) is the decision gate. If it fails, adjust the mesh spacing D or rod count and the tool recalculates instantly.")
     sp(0.4)
 
-    col_fc, col_desc = st.columns([1, 1.1], gap="large")
+    col_f, col_d = st.columns([1, 1.1], gap="large")
 
-    with col_fc:
+    with col_f:
         st.markdown("""
-        <div style="background:#ffffff;border:1px solid #d8dde5;border-radius:3px;padding:1.5rem 1rem 2rem 1rem;">
-
-        <!-- START -->
+        <div style="background:#ffffff;border:1px solid #cde3f4;border-radius:3px;padding:1.4rem 1rem 2rem 1rem;">
         <div style="display:flex;flex-direction:column;align-items:center;">
 
-        <div style="background:#0d2d4a;color:#ffffff;border-radius:20px;padding:0.55rem 1.6rem;font-size:0.78rem;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;width:180px;text-align:center;">
+        <div style="background:#2980b9;color:#fff;border-radius:20px;padding:0.5rem 1.5rem;
+            font-size:0.77rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;width:170px;text-align:center;">
             START
         </div>
+        <div style="width:2px;height:18px;background:#2980b9;margin:0 auto;"></div>
 
-        <div style="width:2px;height:20px;background:#4a6a84;margin:0 auto;"></div>
-
-        <!-- STEP 1 -->
-        <div style="background:#eaf4fb;border:2px solid #1a6fa0;border-radius:3px;padding:0.65rem 1rem;font-size:0.76rem;font-weight:600;color:#0d2d4a;width:270px;text-align:center;line-height:1.5;">
-            STEP 1 — Load Input Parameters
-            <div style="font-size:0.66rem;font-weight:400;margin-top:0.2rem;color:#1a5276;font-family:monospace;">
-                Project, Soil (rho, rho_s, hs), Fault Data (If, tf, ts, Sf, Df, Ta)
+        <div style="background:#ebf5fb;border:2px solid #1a6fa0;border-radius:3px;padding:0.6rem 1rem;
+            font-size:0.75rem;font-weight:600;color:#154360;width:268px;text-align:center;line-height:1.5;">
+            STEP 1 — Phase 1 Inputs
+            <div style="font-size:0.65rem;font-weight:400;margin-top:0.18rem;color:#1a6fa0;font-family:monospace;">
+                rho, rho_s, hs, If, tf, ts, Sf, Df, Ta, material, geometry
             </div>
         </div>
+        <div style="width:2px;height:18px;background:#2980b9;margin:0 auto;"></div>
 
-        <div style="width:2px;height:20px;background:#4a6a84;margin:0 auto;"></div>
-
-        <!-- STEP 2 -->
-        <div style="background:#eaf4fb;border:2px solid #1a6fa0;border-radius:3px;padding:0.65rem 1rem;font-size:0.76rem;font-weight:600;color:#0d2d4a;width:270px;text-align:center;line-height:1.5;">
-            STEP 2 — Calculate Grid Current IG
-            <div style="font-size:0.66rem;font-weight:400;margin-top:0.2rem;color:#1a5276;font-family:monospace;">
+        <div style="background:#ebf5fb;border:2px solid #1a6fa0;border-radius:3px;padding:0.6rem 1rem;
+            font-size:0.75rem;font-weight:600;color:#154360;width:268px;text-align:center;line-height:1.5;">
+            STEP 2 — Compute Grid Current IG
+            <div style="font-size:0.65rem;font-weight:400;margin-top:0.18rem;color:#1a6fa0;font-family:monospace;">
                 IG = If x Sf x Df
             </div>
         </div>
+        <div style="width:2px;height:18px;background:#2980b9;margin:0 auto;"></div>
 
-        <div style="width:2px;height:20px;background:#4a6a84;margin:0 auto;"></div>
-
-        <!-- STEP 3 -->
-        <div style="background:#eafaf1;border:2px solid #1e8449;border-radius:3px;padding:0.65rem 1rem;font-size:0.76rem;font-weight:600;color:#145a32;width:270px;text-align:center;line-height:1.5;">
-            STEP 3 — Conductor Sizing
-            <div style="font-size:0.66rem;font-weight:400;margin-top:0.2rem;color:#1a5c2a;font-family:monospace;">
-                A = If_kA x sqrt[(tc x alpha_r x rho_r x 10^4 / Tcap) / ln(...)]<br>
-                Add corrosion allowance. Select standard diameter.
+        <div style="background:#d5f5e3;border:2px solid #1e7e34;border-radius:3px;padding:0.6rem 1rem;
+            font-size:0.75rem;font-weight:600;color:#145a32;width:268px;text-align:center;line-height:1.5;">
+            STEP 3 — Phase 2: Conductor Sizing
+            <div style="font-size:0.65rem;font-weight:400;margin-top:0.18rem;color:#1a5c2a;font-family:monospace;">
+                A = If_kA x sqrt(thermal factor) | Add corrosion | Select standard dia
             </div>
         </div>
+        <div style="width:2px;height:18px;background:#2980b9;margin:0 auto;"></div>
 
-        <div style="width:2px;height:20px;background:#4a6a84;margin:0 auto;"></div>
-
-        <!-- STEP 4 -->
-        <div style="background:#eafaf1;border:2px solid #1e8449;border-radius:3px;padding:0.65rem 1rem;font-size:0.76rem;font-weight:600;color:#145a32;width:270px;text-align:center;line-height:1.5;">
-            STEP 4 — Define Grid Geometry and Rod Placement
-            <div style="font-size:0.66rem;font-weight:400;margin-top:0.2rem;color:#1a5c2a;font-family:monospace;">
-                Lx, Ly, D, h, Lt | N_rods from perimeter spacing
+        <div style="background:#d5f5e3;border:2px solid #1e7e34;border-radius:3px;padding:0.6rem 1rem;
+            font-size:0.75rem;font-weight:600;color:#145a32;width:268px;text-align:center;line-height:1.5;">
+            STEP 4 — Phase 2: Grid and Rod Layout
+            <div style="font-size:0.65rem;font-weight:400;margin-top:0.18rem;color:#1a5c2a;font-family:monospace;">
+                Lx, Ly, D, h, Lt | N_rods = ceil(Lp / rod_spacing)
             </div>
         </div>
+        <div style="width:2px;height:18px;background:#2980b9;margin:0 auto;"></div>
 
-        <div style="width:2px;height:20px;background:#4a6a84;margin:0 auto;"></div>
-
-        <!-- STEP 5 -->
-        <div style="background:#eafaf1;border:2px solid #1e8449;border-radius:3px;padding:0.65rem 1rem;font-size:0.76rem;font-weight:600;color:#145a32;width:270px;text-align:center;line-height:1.5;">
-            STEP 5 — Calculate Grid Resistance Rg
-            <div style="font-size:0.66rem;font-weight:400;margin-top:0.2rem;color:#1a5c2a;font-family:monospace;">
-                Rg = rho x [1/Lt + (1/sqrt(20A)) x (1 + 1/(1+h.sqrt(20/A)))]<br>
-                Also: Re_pits and Rcombined
+        <div style="background:#d5f5e3;border:2px solid #1e7e34;border-radius:3px;padding:0.6rem 1rem;
+            font-size:0.75rem;font-weight:600;color:#145a32;width:268px;text-align:center;line-height:1.5;">
+            STEP 5 — Phase 4: Grid Resistance Rg
+            <div style="font-size:0.65rem;font-weight:400;margin-top:0.18rem;color:#1a5c2a;font-family:monospace;">
+                Rg = rho x [1/Lt + (1/sqrt(20A)) x (...)]
             </div>
         </div>
+        <div style="width:2px;height:18px;background:#2980b9;margin:0 auto;"></div>
 
-        <div style="width:2px;height:20px;background:#4a6a84;margin:0 auto;"></div>
+        <div style="background:#d5f5e3;border:2px solid #1e7e34;border-radius:3px;padding:0.6rem 1rem;
+            font-size:0.75rem;font-weight:600;color:#145a32;width:268px;text-align:center;line-height:1.5;">
+            STEP 6 — Phase 4: Earth Pit and Combined Resistance
+            <div style="font-size:0.65rem;font-weight:400;margin-top:0.18rem;color:#1a5c2a;font-family:monospace;">
+                Re = (1/N) x [(100 rho_cm)/(2 pi L_cm)] x ln(4L/d) | Rcomb = Rg || Re
+            </div>
+        </div>
+        <div style="width:2px;height:18px;background:#2980b9;margin:0 auto;"></div>
 
-        <!-- STEP 6 -->
-        <div style="background:#eafaf1;border:2px solid #1e8449;border-radius:3px;padding:0.65rem 1rem;font-size:0.76rem;font-weight:600;color:#145a32;width:270px;text-align:center;line-height:1.5;">
-            STEP 6 — Ground Potential Rise
-            <div style="font-size:0.66rem;font-weight:400;margin-top:0.2rem;color:#1a5c2a;font-family:monospace;">
+        <div style="background:#d5f5e3;border:2px solid #1e7e34;border-radius:3px;padding:0.6rem 1rem;
+            font-size:0.75rem;font-weight:600;color:#145a32;width:268px;text-align:center;line-height:1.5;">
+            STEP 7 — Phase 4: GPR
+            <div style="font-size:0.65rem;font-weight:400;margin-top:0.18rem;color:#1a5c2a;font-family:monospace;">
                 GPR = IG x Rg
             </div>
         </div>
+        <div style="width:2px;height:18px;background:#2980b9;margin:0 auto;"></div>
 
-        <div style="width:2px;height:20px;background:#4a6a84;margin:0 auto;"></div>
+        <div style="background:#d5f5e3;border:2px solid #1e7e34;border-radius:3px;padding:0.6rem 1rem;
+            font-size:0.75rem;font-weight:600;color:#145a32;width:268px;text-align:center;line-height:1.5;">
+            STEP 8 — Phase 3: Permissible Safety Limits
+            <div style="font-size:0.65rem;font-weight:400;margin-top:0.18rem;color:#1a5c2a;font-family:monospace;">
+                Ib | Cs | Etouch = Ib x (1000 + 1.5 rho_s Cs) | Estep = Ib x (1000 + 6 rho_s Cs)
+            </div>
+        </div>
+        <div style="width:2px;height:18px;background:#2980b9;margin:0 auto;"></div>
 
-        <!-- STEP 7 -->
-        <div style="background:#eafaf1;border:2px solid #1e8449;border-radius:3px;padding:0.65rem 1rem;font-size:0.76rem;font-weight:600;color:#145a32;width:270px;text-align:center;line-height:1.5;">
-            STEP 7 — Compute Permissible Safety Limits
-            <div style="font-size:0.66rem;font-weight:400;margin-top:0.2rem;color:#1a5c2a;font-family:monospace;">
-                Ib = 0.116/sqrt(ts) | Cs = IEEE Eq.27<br>
-                Etouch = Ib x (1000 + 1.5 x rho_s x Cs)<br>
-                Estep = Ib x (1000 + 6 x rho_s x Cs)
+        <div style="background:#d5f5e3;border:2px solid #1e7e34;border-radius:3px;padding:0.6rem 1rem;
+            font-size:0.75rem;font-weight:600;color:#145a32;width:268px;text-align:center;line-height:1.5;">
+            STEP 9 — Phase 5: Actual Mesh and Step Voltages
+            <div style="font-size:0.65rem;font-weight:400;margin-top:0.18rem;color:#1a5c2a;font-family:monospace;">
+                na, nb, n, Kh, Km, Ks, Kim | Lm, Ls | Em = rho Km Kim IG / Lm | Es = rho Ks Kis IG / Ls
+            </div>
+        </div>
+        <div style="width:2px;height:18px;background:#2980b9;margin:0 auto;"></div>
+
+        <div style="background:#fdf8ec;border:2px solid #c47c0a;border-radius:3px;padding:0.7rem 1.4rem;
+            font-size:0.76rem;font-weight:700;color:#6b4500;width:268px;text-align:center;line-height:1.5;">
+            STEP 10 — SAFETY CHECK
+            <div style="font-size:0.67rem;font-weight:500;margin-top:0.22rem;color:#7d5200;font-family:monospace;">
+                Is Em less than Etouch AND Es less than Estep?
             </div>
         </div>
 
-        <div style="width:2px;height:20px;background:#4a6a84;margin:0 auto;"></div>
-
-        <!-- STEP 8 -->
-        <div style="background:#eafaf1;border:2px solid #1e8449;border-radius:3px;padding:0.65rem 1rem;font-size:0.76rem;font-weight:600;color:#145a32;width:270px;text-align:center;line-height:1.5;">
-            STEP 8 — Compute Actual Mesh and Step Voltages
-            <div style="font-size:0.66rem;font-weight:400;margin-top:0.2rem;color:#1a5c2a;font-family:monospace;">
-                Factors: na, nb, n, Kh, Km, Ks, Kim, Lm, Ls<br>
-                Em = rho x Km x Kim x IG / Lm<br>
-                Es = rho x Ks x Kis x IG / Ls
-            </div>
-        </div>
-
-        <div style="width:2px;height:20px;background:#4a6a84;margin:0 auto;"></div>
-
-        <!-- DECISION -->
-        <div style="background:#fef9e7;border:2px solid #d68910;padding:0.75rem 1.5rem;font-size:0.77rem;font-weight:700;color:#7d6608;width:270px;text-align:center;line-height:1.5;border-radius:3px;">
-            STEP 9 — SAFETY CHECK
-            <div style="font-size:0.68rem;font-weight:500;margin-top:0.25rem;color:#856404;font-family:monospace;">
-                Is Em &lt; Etouch AND Es &lt; Estep ?
-            </div>
-        </div>
-
-        <!-- BRANCH -->
-        <div style="display:flex;justify-content:center;align-items:flex-start;gap:2rem;width:100%;margin-top:0.5rem;">
-
-            <!-- SAFE BRANCH -->
+        <div style="display:flex;justify-content:center;align-items:flex-start;gap:1.8rem;width:100%;margin-top:0.5rem;">
             <div style="display:flex;flex-direction:column;align-items:center;">
-                <div style="background:#1e8449;color:white;font-size:0.63rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:2px;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem;">YES — SAFE</div>
-                <div style="width:2px;height:16px;background:#4a6a84;"></div>
-                <div style="background:#eafaf1;border:2px solid #1e8449;border-radius:3px;padding:0.55rem 0.8rem;font-size:0.72rem;font-weight:600;color:#145a32;width:130px;text-align:center;line-height:1.5;">
+                <div style="background:#1e7e34;color:#fff;font-size:0.62rem;font-weight:700;
+                    padding:0.18rem 0.55rem;border-radius:2px;text-transform:uppercase;
+                    letter-spacing:0.08em;margin-bottom:0.28rem;">YES — SAFE</div>
+                <div style="width:2px;height:14px;background:#2980b9;"></div>
+                <div style="background:#d5f5e3;border:2px solid #1e7e34;border-radius:3px;
+                    padding:0.5rem 0.75rem;font-size:0.71rem;font-weight:600;color:#145a32;
+                    width:120px;text-align:center;line-height:1.5;">
                     Design Approved
-                    <div style="font-size:0.64rem;font-weight:400;margin-top:0.15rem;color:#1a5c2a;">Generate Report</div>
+                    <div style="font-size:0.63rem;font-weight:400;margin-top:0.12rem;color:#1a5c2a;">
+                        Generate report</div>
                 </div>
             </div>
-
-            <!-- UNSAFE BRANCH -->
             <div style="display:flex;flex-direction:column;align-items:center;">
-                <div style="background:#c0392b;color:white;font-size:0.63rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:2px;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.3rem;">NO — UNSAFE</div>
-                <div style="width:2px;height:16px;background:#4a6a84;"></div>
-                <div style="background:#fdedec;border:2px solid #c0392b;border-radius:3px;padding:0.55rem 0.8rem;font-size:0.72rem;font-weight:600;color:#78281f;width:130px;text-align:center;line-height:1.5;">
-                    Remediation
-                    <div style="font-size:0.64rem;font-weight:400;margin-top:0.15rem;color:#922b21;">Reduce D or adjust rods. Return to Step 4.</div>
+                <div style="background:#b92020;color:#fff;font-size:0.62rem;font-weight:700;
+                    padding:0.18rem 0.55rem;border-radius:2px;text-transform:uppercase;
+                    letter-spacing:0.08em;margin-bottom:0.28rem;">NO — REVISE</div>
+                <div style="width:2px;height:14px;background:#2980b9;"></div>
+                <div style="background:#fdf0f0;border:2px solid #b92020;border-radius:3px;
+                    padding:0.5rem 0.75rem;font-size:0.71rem;font-weight:600;color:#7b1818;
+                    width:128px;text-align:center;line-height:1.5;">
+                    Reduce D or add rods
+                    <div style="font-size:0.63rem;font-weight:400;margin-top:0.12rem;color:#922b21;">
+                        Return to Step 4</div>
                 </div>
             </div>
-
         </div>
 
         </div>
-        </div>
-        """, unsafe_allow_html=True)
+        </div>""", unsafe_allow_html=True)
 
-    with col_desc:
-        sec("Algorithm Steps — What Each Step Does")
-
+    with col_d:
+        sec("What Each Step Does and Why")
         steps = [
-            ("STEP 1", "Load Input Parameters",
-             "All inputs are entered in the sidebar: project details, soil resistivity (rho), surface layer (rho_s, hs), fault current (If), fault duration (tf), shock duration (ts), current division factor (Sf), decrement factor (Df), ambient temperature (Ta), grid dimensions, conductor type, and rod parameters."),
-            ("STEP 2", "Calculate Grid Current IG",
-             "IG = If x Sf x Df. Not all fault current flows through the grid. Sf accounts for the fraction returned via earth wires. Df corrects for DC offset in initial fault cycles. IG is the current actually flowing between grid and soil — used for all voltage calculations."),
-            ("STEP 3", "Conductor Sizing — Thermal and Corrosion",
-             "The conductor must carry If for tf seconds without melting. The full IEEE 80 thermal formula calculates minimum cross-sectional area A. The calculated diameter is then increased by the corrosion allowance from CBIP Table 3.9 based on soil resistivity. The next standard diameter from CBIP Table 3.6 is selected."),
-            ("STEP 4", "Define Grid Geometry and Rod Placement",
-             "The grid dimensions (Lx, Ly), mesh spacing (D), burial depth (h), and total conductor length (Lt) define the physical layout. The number of ground rods is calculated from the perimeter length divided by the chosen spacing — one rod every X metres along the perimeter, which is standard Indian practice."),
-            ("STEP 5", "Calculate Grid Resistance Rg",
-             "Using the Sverak formula (IEEE Std 80 Eq.52 / CBIP Eqn 5.32): Rg = rho x [1/Lt + (1/sqrt(20A)) x (1 + 1/(1 + h x sqrt(20/A)))]. Also calculates earth pit resistance Re and the combined parallel resistance Rcomb. Target is Rg < 1.0 ohm per typical project specification."),
-            ("STEP 6", "Ground Potential Rise",
-             "GPR = IG x Rg. The entire grid rises to this voltage above remote earth during a fault. This is the maximum transferred potential to any metallic conductor leaving the station. IEEE Std 80 Sec 15.1: if GPR < Etouch permissible, the design is inherently safe without further analysis."),
-            ("STEP 7", "Permissible Safety Voltage Limits",
-             "Ib = 0.116/sqrt(ts) gives the maximum safe body current for 50 kg person. Cs (IEEE Eq.27) corrects for finite surface layer thickness. Etouch = Ib x (1000 + 1.5 x rho_s x Cs) and Estep = Ib x (1000 + 6 x rho_s x Cs) give the limits that actual voltages must not exceed."),
-            ("STEP 8", "Actual Mesh and Step Voltages",
-             "Geometric factors na, nb, n, Kh, Km, Ks, Kim are calculated from grid geometry. Effective lengths Lm and Ls are derived from CBIP Eqn 5.29 and 5.30. Then Em = rho x Km x Kim x IG / Lm and Es = rho x Ks x Kis x IG / Ls. These are the actual worst-case voltages in the grid."),
-            ("STEP 9", "Safety Check and Decision",
-             "If Em < Etouch AND Es < Estep: design is safe. If either condition fails: reduce mesh spacing D (reduces Em), add peripheral rods (reduces Es), or adjust grid area. The design is then revised from Step 4 and rechecked. Empirical formula accuracy is approximately plus or minus 15 percent compared to computer simulation."),
+            ("STEP 1", "Load Inputs",
+             "All project, soil, fault, and geometry data is entered. Soil resistivity rho comes from Wenner 4-probe site measurement (CBIP Ch.9). Fault current If comes from the system short circuit study — it is the most critical input, driving all conductor sizes and voltages. Surface layer resistivity rho_s = 3000 ohm-m is the CBIP standard assumption for crushed rock or concrete."),
+            ("STEP 2", "Compute Grid Current IG",
+             "Not all fault current flows through the grid. Sf (Current Division Factor) is the fraction that actually enters the soil — the rest returns via overhead earth wires of transmission lines. Df (Decrement Factor) corrects for the DC component in initial fault cycles. For tf >= 0.5s, IEEE 80 allows Df = 1.0. IG = If x Sf x Df is the current used for all EPR and voltage calculations."),
+            ("STEP 3", "Conductor Thermal Sizing",
+             "The conductor must carry If for tf seconds without melting. The IEEE 80 full thermal formula (Clause 9.4 / 11.3) uses material constants — rho_r, alpha_r, SW, SH — to compute minimum area A. The diameter is extracted from A = pi x r^2. CBIP simplified formula (K x If x sqrt(tf) x 10^-3) is used for cross-check. Both should agree."),
+            ("STEP 4", "Corrosion Allowance and Standard Diameter",
+             "MS steel corrodes underground over its 30-50 year service life. The calculated diameter is increased by an allowance from CBIP Table 3.9 based on soil resistivity class. The final area is compared to IS 3043 minimum (100 or 200 mm2 depending on soil). The next available standard diameter from CBIP Table 3.6 is selected."),
+            ("STEP 5", "Grid Resistance Rg",
+             "The Sverak formula (IEEE Std 665 / CBIP Eqn 5.32) calculates Rg from total conductor length Lt, grid area A, and burial depth h. This is the resistance between the grid and remote earth — it governs GPR and indirectly governs Em and Es. Target Rg less than 1.0 ohm is typical project specification."),
+            ("STEP 6", "Earth Pit and Combined Resistance",
+             "Separate earth pits (pipe electrodes outside the main grid) provide additional parallel paths. Their resistance Re is calculated using the rod electrode formula. The parallel combination Rcomb = Rg in parallel with Re gives the final system earth resistance."),
+            ("STEP 7", "Ground Potential Rise GPR",
+             "GPR = IG x Rg is the maximum voltage the grid rises to above remote earth. This is the maximum transferred potential to any metallic conductor leaving the station. IEEE 80 Sec 15.1: If GPR less than Etouch permissible, the design is inherently safe without further mesh voltage analysis."),
+            ("STEP 8", "Permissible Safety Voltage Limits",
+             "The maximum body current Ib a person can safely tolerate is 0.116/sqrt(ts) for a 50 kg person (statistically, 99.5% survival without ventricular fibrillation). Cs corrects for finite surface layer thickness. Etouch and Estep are derived from Ib times the total circuit resistance (body plus feet)."),
+            ("STEP 9", "Actual Mesh and Step Voltages",
+             "Geometric factors na, nb, n, Kh, Km, Ks, Kim are calculated from grid dimensions and conductor sizes. Effective lengths Lm and Ls are derived. Em = rho x Km x Kim x IG / Lm gives the worst mesh voltage (at corner meshes). Es = rho x Ks x Kis x IG / Ls gives the worst step voltage (just outside grid corners)."),
+            ("STEP 10", "Safety Check and Decision",
+             "If Em less than Etouch AND Es less than Estep: design passes. If either fails: reduce mesh spacing D (reduces Em by adding more conductors), add more peripheral rods (reduces Es), or increase grid area (reduces Rg). In this tool, changing any sidebar input instantly recalculates all results."),
         ]
-
-        for step_id, step_name, step_desc in steps:
+        for sid, sname, sdesc in steps:
             st.markdown(f"""
-            <div style="display:flex;align-items:flex-start;gap:0.8rem;margin-bottom:0.75rem;padding:0.7rem 0.9rem;background:#ffffff;border:1px solid #d8dde5;border-radius:3px;">
-                <div style="background:#0d2d4a;color:#ffffff;font-size:0.6rem;font-weight:700;padding:0.25rem 0.5rem;border-radius:2px;white-space:nowrap;flex-shrink:0;margin-top:0.05rem;letter-spacing:0.06em;text-transform:uppercase;">{step_id}</div>
+            <div style="display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:0.7rem;
+                padding:0.65rem 0.85rem;background:#ffffff;border:1px solid #cde3f4;border-radius:3px;">
+                <div style="background:#2980b9;color:#fff;font-size:0.59rem;font-weight:700;
+                    padding:0.22rem 0.45rem;border-radius:2px;white-space:nowrap;flex-shrink:0;
+                    margin-top:0.04rem;letter-spacing:0.06em;text-transform:uppercase;">{sid}</div>
                 <div>
-                    <div style="font-size:0.78rem;font-weight:700;color:#0d2d4a;margin-bottom:0.2rem;">{step_name}</div>
-                    <div style="font-size:0.74rem;color:#2c3e50;line-height:1.6;">{step_desc}</div>
+                    <div style="font-size:0.77rem;font-weight:700;color:#154360;margin-bottom:0.18rem;">{sname}</div>
+                    <div style="font-size:0.73rem;color:#1a2e40;line-height:1.62;">{sdesc}</div>
                 </div>
-            </div>
-            """, unsafe_allow_html=True)
+            </div>""", unsafe_allow_html=True)
 
-        sp(0.5)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# PHASE 1 — INPUTS
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+with t_p1:
+    phase(1, "Data Collection and Input Parameters")
+    rinfo("Phase 1 is about collecting and understanding the input data. Every value must have a traceable source — a measurement report, a system study, or a code-specified default. This tab explains what each parameter means, why it is needed, and how it is typically obtained.")
+    sp(0.3)
+
+    col1, col2 = st.columns([1,1], gap="large")
+    with col1:
+        sec("1.1 Soil Resistivity — The Most Important Parameter")
         st.markdown("""
-        <div style="background:#fef9e7;border:1px solid #f8c471;border-left:3px solid #d68910;padding:0.75rem 0.9rem;border-radius:0 3px 3px 0;font-size:0.75rem;color:#7d6608;line-height:1.65;">
-        <b>Design Iteration:</b> The safety check (Step 9) is the decision gate. If the design fails,
-        change the mesh spacing D (most effective for Em), add more rods at the perimeter (most
-        effective for Es), or increase the grid area (most effective for Rg). Then re-run from Step 4.
-        The sidebar inputs update all calculations instantly — no re-run is needed in this tool.
-        </div>
-        """, unsafe_allow_html=True)
+        <div class="card" style="font-size:0.8rem;color:#1a2e40;line-height:1.85">
+        <b>What is soil resistivity?</b><br>
+        Soil resistivity (rho, in ohm-m) measures how strongly the soil opposes current flow.
+        High resistivity means current dissipates poorly — leading to high grid resistance Rg,
+        high GPR, and high touch/step voltages.<br><br>
+        <b>How is it measured?</b><br>
+        The standard method is the Wenner 4-probe method (CBIP Chapter 9, IEEE Std 81).
+        Four probes are placed in a straight line with equal spacing 'a'. A test current flows
+        between the outer two probes, and voltage is measured between the inner two.
+        Apparent resistivity rho = 2 x pi x a x (V/I). This is repeated for multiple
+        spacings 'a' ranging from about 1m to the larger grid dimension.<br><br>
+        <b>Why does spacing matter?</b><br>
+        Small spacing gives shallow soil data. Large spacing gives deeper soil data.
+        The average of all readings (or a two-layer soil model) gives the design value.<br><br>
+        <b>Typical values:</b> Clay or loam soil = 30 to 150 ohm-m. Sandy soil = 100 to 500 ohm-m.
+        Rocky soil = 500 to 3000 ohm-m. The example values in this tool (rho = 53 ohm-m)
+        represent a typical site with loamy or clay soil.
+        </div>""", unsafe_allow_html=True)
+
+        known_table("Phase 1 — Soil Parameters (Known Values and Source)", [
+            ("rho", f"{rho} ohm-m", "Mean soil resistivity of the site", "Wenner 4-probe measurements — site soil resistivity test report. CBIP Ch.9."),
+            ("rho_s", f"{rho_s} ohm-m", "Surface layer (concrete / crushed rock) resistivity", "CBIP and IEEE 80 standard assumption for crushed rock or concrete. Actual value should be measured from material samples."),
+            ("hs", f"{h_s} m", "Thickness of surface layer", "As specified in the project technical specification or site condition."),
+        ])
+
+        sec("1.2 Fault Current — The Driving Force")
+        st.markdown("""
+        <div class="card" style="font-size:0.8rem;color:#1a2e40;line-height:1.85">
+        <b>What is earth fault current If?</b><br>
+        When one phase conductor touches an earthed metal structure (a line-to-earth fault),
+        a current of magnitude If flows from the source, through the fault point, into the
+        earthing system, and back through earth to the source neutral.<br><br>
+        <b>Single phase to earth fault — why not three phase?</b><br>
+        Three-phase short circuits produce the highest current but no current flows through
+        earth (symmetrical, no zero sequence component). Single line-to-earth faults are
+        statistically the most frequent (over 80% of all faults) and DO flow through earth.
+        CBIP Sec 3.7.1: Single line-to-earth fault current is used for earthing design.<br><br>
+        <b>How is If determined?</b><br>
+        From the system short circuit study: If = 3 x I0 where I0 = E / (Z1 + Z2 + Z0).
+        The system impedances Z1, Z2, Z0 are obtained from the network model.<br><br>
+        <b>Why use maximum future value?</b><br>
+        The earthing system must last 30-50 years. System capacity grows over time, adding
+        more transformers and lines, which increases fault levels. CBIP Sec 3.7.4 recommends
+        using a future fault level estimate for earthing design.
+        </div>""", unsafe_allow_html=True)
+
+    with col2:
+        sec("1.3 Duration Parameters — tf and ts")
+        st.markdown("""
+        <div class="card" style="font-size:0.8rem;color:#1a2e40;line-height:1.85">
+        <b>Why are there two different durations?</b><br>
+        There are two separate uses for fault duration — one for the conductor (how long it
+        must carry current without melting) and one for the human body (how long a person
+        might be in contact with a dangerous voltage before the relay clears the fault).<br><br>
+        <b>tf — Fault duration for conductor sizing:</b><br>
+        This is the MAXIMUM possible fault clearing time including backup protection failure.
+        The conductor must survive even if the primary relay fails and the backup relay operates.
+        CBIP Sec 3.7.3:<br>
+        - Digital / solid-state relays: tf = 1 second<br>
+        - Electromagnetic relays: tf = 3 seconds<br><br>
+        <b>ts — Shock duration for safety voltages:</b><br>
+        This is the PRIMARY relay clearing time — the time from when a person makes contact
+        with a dangerous voltage until the primary relay clears the fault. CBIP Sec 3.7.3:<br>
+        - Digital relays: ts = 0.5 second<br>
+        - EM relays: ts = 1.0 second<br><br>
+        Note: The reference calculation used tf = 1s for conductor sizing and ts = 0.5s
+        for permissible voltage calculation. Always use ts less than or equal to tf.
+        </div>""", unsafe_allow_html=True)
+
+        sec("1.4 Current Division Factor Sf and Decrement Factor Df")
+        st.markdown("""
+        <div class="card" style="font-size:0.8rem;color:#1a2e40;line-height:1.85">
+        <b>Current Division Factor Sf:</b><br>
+        When a fault occurs at the station, the fault current If flows from the source into
+        the fault. Part of this returns via overhead earth wires (shield wires) of the
+        outgoing transmission lines — directly back to the source towers without entering
+        the soil at the station at all. Only the remainder (Sf x If) actually flows between
+        the station grid and the soil. CBIP Sec 3.7.2: IG = Sf x If.<br><br>
+        A typical value for a station with multiple outgoing lines with earth wires is
+        Sf = 0.60 to 0.80. The reference calculation used Sf = 0.70 (70% into grid,
+        30% via earth wires of outgoing lines).<br><br>
+        Accurate Sf requires the CBIP software 'gridi' using line impedance data.
+        If not available, use Sf = 1.0 (conservative — all current through grid).<br><br>
+        <b>Decrement Factor Df:</b><br>
+        A fault current has a symmetrical AC component plus a decaying DC component
+        in the first few cycles. This DC offset makes the effective rms current larger
+        than the symmetrical value. IEEE 80-2013 Cl.15.10: For tf >= 0.5 seconds
+        (30 cycles at 50Hz), Df = 1.0. The reference calculation used Df = 1.0.
+        </div>""", unsafe_allow_html=True)
+
+        known_table("Phase 1 — Fault Parameters (Known Values and Source)", [
+            ("If", f"{If_kA} kA = {If_A:.0f} A", "Maximum single line-to-earth fault current", "System short circuit study. CBIP Sec 3.7.1."),
+            ("tf", f"{tf_val} s", "Fault duration for conductor thermal sizing", "CBIP Sec 3.7.3 — includes backup protection clearing time."),
+            ("ts", f"{ts_val} s", "Shock duration for permissible voltage calculation", "CBIP Sec 3.7.3 — primary relay clearing time only."),
+            ("Sf", f"{Sf}", "Current division factor (fraction entering grid soil)", "System study or CBIP gridi software. Use 1.0 if unknown."),
+            ("Df", f"{Df}", "Decrement factor for DC offset in initial cycles", "IEEE 80-2013 Cl.15.10: Df = 1.0 for tf >= 0.5s."),
+            ("Ta", f"{Ta} deg C", "Initial conductor / ambient temperature", "Maximum site ambient temperature."),
+        ])
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# TAB 1 — CONDUCTOR SIZING
+# PHASE 2 — CONDUCTOR SIZING
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-with t1:
-    sec("3.01 Selection of Conductor Size")
-    info("The conductor must carry the full earth fault current for the specified fault duration without its temperature exceeding the maximum permissible value. Two formulae are given — the full IEEE formula and the simplified CBIP formula. Both should give consistent results.")
+with t_p2:
+    phase(2, "Conductor Sizing, Corrosion Allowance, and Grid Layout")
+    rinfo("Phase 2 has two parts: (A) sizing the conductor so it carries the fault current without melting, and (B) deciding the grid geometry — dimensions, mesh spacing, burial depth, and rod placement. Together they define the physical earthing installation.")
     sp(0.3)
 
     col1, col2 = st.columns([1.1, 0.9], gap="large")
     with col1:
-        sec("Material Constants Used (IEEE 80 / CBIP Table 3.5)")
-        st.markdown(f"""<table class="dtable">
-        <tr><th>Constant</th><th>Symbol</th><th>Value</th><th>Unit</th><th>Meaning</th></tr>
-        <tr><td>Resistivity of conductor</td><td class="mono">rho_r</td><td class="mono">{rho_r}</td><td>micro-ohm-cm</td><td>Electrical resistivity of material</td></tr>
-        <tr><td>Thermal coefficient</td><td class="mono">alpha_r</td><td class="mono">{alpha_r}</td><td>per deg C</td><td>Rate of change of resistance with temperature</td></tr>
-        <tr><td>Density of material</td><td class="mono">SW</td><td class="mono">{SW}</td><td>g per cm3</td><td>Mass per unit volume</td></tr>
-        <tr><td>Specific heat</td><td class="mono">SH</td><td class="mono">{SH}</td><td>cal per g-deg C</td><td>Heat capacity of material</td></tr>
-        <tr><td>Thermal capacity factor</td><td class="mono">Tcap = 4.184 x SH x SW</td><td class="mono">{Tcap:.4f}</td><td>—</td><td>Energy stored per unit volume per degree</td></tr>
-        <tr><td>Max. allowable temperature</td><td class="mono">Tm</td><td class="mono">{Tm}</td><td>deg C</td><td>Conductor temperature limit for joint type</td></tr>
-        <tr><td>Reference temperature</td><td class="mono">Tr</td><td class="mono">{Tr}</td><td>deg C</td><td>Temperature at which rho_r and alpha_r are specified</td></tr>
-        <tr><td>K0 = (1/alpha_r) - Tr</td><td class="mono">K0</td><td class="mono">{K0:.2f}</td><td>deg C</td><td>Derived constant for formula</td></tr>
-        <tr><td>Ambient temperature</td><td class="mono">Ta</td><td class="mono">{Ta}</td><td>deg C</td><td>Initial conductor temperature before fault</td></tr>
+        sec("2.1 Material Constants (IEEE 80 Table 1 / CBIP Table 3.5)")
+        st.markdown(f"""<table class="dt">
+        <tr><th>Symbol</th><th>Parameter</th><th>Value</th><th>Unit</th><th>Physical Meaning</th></tr>
+        <tr><td class="mn">rho_r</td><td>Electrical resistivity of conductor material</td><td class="mn">{rho_r}</td><td>micro-ohm-cm</td><td>How much the conductor resists current — determines heat generated during fault</td></tr>
+        <tr><td class="mn">alpha_r</td><td>Thermal coefficient of resistivity at Tr</td><td class="mn">{alpha_r}</td><td>per deg C</td><td>Rate of increase of resistance with temperature</td></tr>
+        <tr><td class="mn">SW</td><td>Density of conductor material</td><td class="mn">{SW}</td><td>g per cm3</td><td>Mass per unit volume — determines how much material stores heat</td></tr>
+        <tr><td class="mn">SH</td><td>Specific heat of conductor material</td><td class="mn">{SH}</td><td>cal per g per deg C</td><td>Heat capacity — higher SH means more energy needed to raise temperature</td></tr>
+        <tr><td class="mn">Tcap</td><td>Thermal capacity factor = 4.184 x SH x SW</td><td class="mn">{Tcap:.4f}</td><td>(dimensionless)</td><td>Combined measure of material ability to absorb fault energy without overheating</td></tr>
+        <tr><td class="mn">Tm</td><td>Maximum allowable conductor temperature</td><td class="mn">{Tm}</td><td>deg C</td><td>For welded joints: 500 deg C. For bolted: 310 deg C (CBIP Table 3.5).</td></tr>
+        <tr><td class="mn">Tr</td><td>Reference temperature for material constants</td><td class="mn">{Tr}</td><td>deg C</td><td>Temperature at which rho_r and alpha_r are specified in IEEE 80 tables</td></tr>
+        <tr><td class="mn">K0</td><td>Derived constant = (1/alpha_r) - Tr</td><td class="mn">{K0:.2f}</td><td>deg C</td><td>Intermediate calculation value used in the full thermal formula</td></tr>
+        <tr><td class="mn">Ta</td><td>Initial (ambient) conductor temperature</td><td class="mn">{Ta}</td><td>deg C</td><td>Starting temperature before fault — use maximum ambient for conservative result</td></tr>
         </table>""", unsafe_allow_html=True)
 
-        sec("IEEE 80 Full Thermal Formula — Clause 11.3 / Clause 9.4")
-        fblock(
+        sec("2.2 Full Thermal Formula — IEEE 80-2013 Cl.11.3 / Cl.9.4")
+        fb(
             "A = If_kA x sqrt [ (tc x alpha_r x rho_r x 10^4 / Tcap) / ln(1 + (Tm - Ta) / (K0 + Ta)) ]",
             {
-                "A (mm2)": "Minimum cross-sectional area to prevent conductor fusing",
-                "If_kA": f"{If_kA} kA — earth fault current (AC rms, negligible impedance fault)",
-                "tc = tf": f"{tf_val} s — conductor fault duration (maximum, including backup protection)",
-                "alpha_r": f"{alpha_r} per deg C",
-                "rho_r": f"{rho_r} micro-ohm-cm",
-                "Tcap": f"4.184 x {SH} x {SW} = {Tcap:.4f}",
-                "Tm": f"{Tm} deg C — maximum permissible conductor temperature",
-                "Ta": f"{Ta} deg C — initial ambient temperature",
-                "K0": f"(1 / {alpha_r}) - {Tr} = {K0:.2f} deg C",
-                "Numerator inside sqrt": f"{tf_val} x {alpha_r} x {rho_r} x 10000 / {Tcap:.4f} = {numer:.4f}",
-                "Denominator (ln term)": f"ln(1 + ({Tm}-{Ta}) / ({K0:.2f}+{Ta})) = ln({ln_arg:.5f}) = {ln_val:.4f}",
-                "sqrt argument": f"{numer:.4f} / {ln_val:.4f} = {numer/ln_val:.4f}",
+                "A (mm2)": "Minimum cross-sectional area of conductor to prevent melting (fusing)",
+                "If_kA": f"{If_kA} kA — earth fault current in kilo-Amperes (AC rms, negligible impedance fault)",
+                "tc = tf": f"{tf_val} s — fault current flow duration (conductor sizing — includes backup protection)",
+                "alpha_r": f"{alpha_r} per deg C — thermal coefficient of resistivity",
+                "rho_r": f"{rho_r} micro-ohm-cm — electrical resistivity of conductor material at Tr",
+                "Tcap": f"4.184 x {SH} x {SW} = {Tcap:.4f} — thermal capacity factor",
+                "Tm": f"{Tm} deg C — maximum allowable conductor temperature (joint type dependent)",
+                "Ta": f"{Ta} deg C — initial conductor temperature (maximum ambient)",
+                "K0": f"(1 / {alpha_r}) - {Tr} = {K0:.2f} deg C — derived constant",
+                "ln(1 + (Tm-Ta)/(K0+Ta))": f"ln(1 + ({Tm}-{Ta})/({K0:.2f}+{Ta})) = ln({ln_arg:.5f}) = {ln_val:.4f}",
+                "Inner fraction": f"({tf_val} x {alpha_r} x {rho_r} x 10000 / {Tcap:.4f}) / {ln_val:.4f} = {numer:.4f} / {ln_val:.4f} = {numer/ln_val:.4f}",
             },
-            "IEEE Std 80-2013 Cl.11.3 — Full thermal formula  |  IEEE 80-1986 Cl.9.4",
-            f"A = {If_kA} x sqrt({numer/ln_val:.4f}) = {If_kA} x {math.sqrt(numer/ln_val):.4f} = {A_ieee:.3f} mm2"
+            "This formula comes from the adiabatic (no heat loss) heating model. During a fault of short duration, all electrical energy generated in the conductor is stored as heat in the conductor itself — there is no time for heat to escape to the surrounding soil. The formula calculates the minimum cross-section that keeps temperature below Tm.",
+            "IEEE Std 80-2013 Clause 11.3 — Full thermal formula. Same as IEEE 80-1986 Clause 9.4. CBIP Pub.339 Sec 3.8.2.",
+            f"A = {If_kA} x sqrt({numer/ln_val:.4f}) = {If_kA} x {math.sqrt(numer/ln_val):.5f} = {A_ieee:.3f} mm2"
         )
 
-        sec("CBIP Simplified Formula — Cross-Check (CBIP Eqn 3.20 / Table 3.5)")
-        fblock(
+        sec("2.3 CBIP Simplified Formula — Cross-Check (CBIP Eqn 3.20)")
+        fb(
             "Ac = K x If x sqrt(tf) x 10^-3",
             {
-                "K": f"{K_cbip} — CBIP Table 3.5 constant for selected material and joint type",
-                "If (A)": f"{If_A:.0f} A",
+                "K": f"{K_cbip} — CBIP Table 3.5 constant. Encapsulates all material constants for this material and joint type.",
+                "If (A)": f"{If_A:.0f} A — note: If is in Amperes here (not kA)",
                 "tf (s)": f"{tf_val} s",
+                "10^-3": "Unit conversion",
             },
-            "CBIP Manual Pub.339 Eqn 3.20 — Table 3.5 — Simplified formula for quick sizing",
-            f"Ac = {K_cbip} x {If_A:.0f} x sqrt({tf_val}) x 0.001 = {K_cbip * If_A * math.sqrt(tf_val) * 1e-3:.3f} mm2"
+            "CBIP derived a simplified K factor by pre-substituting the material constants into the IEEE full formula. For MS Steel welded joints: K = 12.15. For MS Steel bolted joints: K = 15.7 (lower Tm = 310 deg C gives larger required area).",
+            "CBIP Manual Pub.339 Eqn 3.18 (K=12.15 welded), Eqn 3.19 (K=15.7 bolted), Eqn 3.20 (general). Table 3.5.",
+            f"Ac = {K_cbip} x {If_A:.0f} x sqrt({tf_val}) x 0.001 = {K_cbip * If_A * math.sqrt(tf_val) * 1e-3:.3f} mm2  (IEEE result: {A_ieee:.3f} mm2)"
         )
-        info(f"Both methods are consistent. IEEE formula gives A = {A_ieee:.1f} mm2. CBIP simplified gives {K_cbip * If_A * math.sqrt(tf_val) * 1e-3:.1f} mm2. Use IEEE formula for the design; CBIP for cross-check.")
+        rinfo(f"Both formulas agree: IEEE gives {A_ieee:.1f} mm2, CBIP gives {K_cbip * If_A * math.sqrt(tf_val) * 1e-3:.1f} mm2. Small difference is due to rounding in K constant. Use IEEE formula for design, CBIP for cross-check.")
 
     with col2:
-        sec("Conversion from Area to Diameter")
-        fblock(
-            "r = sqrt(A / pi)    =>    d = 2r",
+        sec("2.4 Diameter and Corrosion Allowance")
+        fb(
+            "r = sqrt(A / pi)   =>   d = 2 x r   =>   d_design = d + corrosion_allowance",
             {
-                "A (mm2)": f"{A_ieee:.3f} — from IEEE formula above",
-                "r (mm)": f"sqrt({A_ieee:.3f} / pi) = sqrt({A_ieee/math.pi:.4f}) = {r_calc:.4f}",
-                "d (mm)": f"2 x {r_calc:.4f} = {d_calc_mm:.4f}",
+                "A (mm2)": f"{A_ieee:.3f} — minimum area from IEEE formula",
+                "r (mm)": f"sqrt({A_ieee:.3f} / pi) = {r_calc:.4f}",
+                "d_calculated (mm)": f"2 x {r_calc:.4f} = {d_calc:.4f}",
+                "Corrosion class": f"{corr_cls} (at rho = {rho} ohm-m, CBIP Table 3.7)",
+                "Corrosion allowance": f"+{corr_mm} mm added to diameter (CBIP Table 3.9)",
+                "d_design (mm)": f"{d_calc:.4f} + {corr_mm} = {d_corr:.4f}",
+                "A_corr (mm2)": f"pi x ({d_corr:.4f}/2)^2 = {A_corr:.2f}",
+                "IS 3043 minimum area": f"{min_a} mm2 for {corr_cls.split('/')[0].strip()} soil",
+                "A_final (mm2)": f"max({A_corr:.2f}, {min_a}) = {A_final:.2f}",
             },
-            "Geometry",
-            f"Calculated conductor diameter = {d_calc_mm:.2f} mm"
+            "Steel corrodes in soil over 30-50 year service life. The corroded conductor has less cross-section and may not carry fault current safely near end of life. CBIP Table 3.9 gives corrosion allowance based on soil resistivity class. The reference calculation confirmed: calculated dia = 25.8mm, after +4.5mm corrosion allowance = 30.3mm, selected standard 32mm.",
+            "CBIP Pub.339 Table 3.7 (soil corrosiveness) + Table 3.9 (corrosion allowance). IS 3043 Sec 5.3.4 (minimum sizes).",
+            f"Corrosion-corrected conductor diameter = {d_corr:.2f} mm. Design area = {A_final:.2f} mm2."
         )
 
-        sec("Corrosion Allowance — CBIP Table 3.9")
-        st.markdown(f"""<table class="dtable">
-        <tr><th>Step</th><th>Value</th></tr>
-        <tr><td>Calculated diameter from thermal formula</td><td class="mono">{d_calc_mm:.2f} mm</td></tr>
-        <tr><td>Soil class at rho = {rho} ohm-m</td><td>{corr_class}</td></tr>
-        <tr><td>Corrosion allowance added to diameter</td><td class="mono">+ {corr_thk} mm (CBIP Table 3.9)</td></tr>
-        <tr><td>Diameter after corrosion allowance</td><td class="mono">{d_with_corr:.2f} mm</td></tr>
-        <tr><td>Equivalent area after corrosion</td><td class="mono">{A_with_corr:.2f} mm2</td></tr>
-        <tr><td>IS 3043 minimum area for this soil</td><td class="mono">{min_area} mm2</td></tr>
-        <tr><td>Design area (larger of the two above)</td><td class="mono">{A_final:.2f} mm2</td></tr>
-        </table>""", unsafe_allow_html=True)
-
-        info("IS 3043 Sec 5.3.4: Minimum area = 100 mm2 (non-corrosive soil), 200 mm2 (corrosive soil). Minimum thickness = 3mm (non-corrosive), 6mm (corrosive). Minimum above-ground earth lead = 50 mm2.")
-
-        sec("Standard Conductor Selection — CBIP Table 3.6")
-        rows_dia = ""
+        sec("2.5 Standard Conductor Selection (CBIP Table 3.6)")
+        rows = ""
         for d in STD_DIA:
             a = math.pi*(d/2.0)**2
-            selected = d == sel_dia
-            status = "SELECTED" if selected else ("below required" if a < A_final else "acceptable")
-            cls = "pass" if selected else ""
-            bg  = ' class="hl"' if selected else ""
-            rows_dia += f"<tr{bg}><td class='mono'>{d}</td><td class='mono'>{a:.1f}</td><td class='{cls}'>{status}</td></tr>"
-
-        st.markdown(f"""<table class="dtable">
+            sel = d == sel_dia
+            stt = "SELECTED" if sel else ("below required" if a < A_final else "acceptable")
+            cl = " ps" if sel else ""
+            bg = ' class="hl"' if sel else ""
+            rows += f"<tr{bg}><td class='mn'>{d}</td><td class='mn'>{a:.1f}</td><td class='mn{cl}'>{stt}</td></tr>"
+        st.markdown(f"""<table class="dt">
         <tr><th>Standard Dia (mm)</th><th>Area (mm2)</th><th>Status</th></tr>
-        {rows_dia}</table>""", unsafe_allow_html=True)
-
+        {rows}</table>""", unsafe_allow_html=True)
         sp(0.3)
-        res_pass(f"Selected conductor: {sel_dia} mm diameter MS round rod. Area = {sel_area:.1f} mm2. Satisfies thermal and corrosion requirements.")
+        rpass(f"Selected conductor: {sel_dia} mm diameter MS round rod. Area = {sel_area:.1f} mm2. Meets thermal and corrosion requirements.")
 
-        sec("Surface Current Density Limit — CBIP Eqn 3.21")
-        Jsd = math.sqrt(57.7 / (rho * tf_val)) * 1e-3
-        fblock(
+        sec("2.6 Surface Current Density Limit (CBIP Eqn 3.21)")
+        Jsd = math.sqrt(57.7/(rho*tf_val))*1e-3
+        fb(
             "Isd = 10^-3 x sqrt(57.7 / (rho x tf))   [A per mm2]",
             {
-                "57.7": "Empirical constant from IS 3043 / BS 7430",
+                "Isd (A/mm2)": "Maximum allowable current density at conductor surface",
+                "57.7": "Empirical constant from IS 3043 / BS 7430 — based on soil drying temperature",
                 "rho (ohm-m)": f"{rho}",
                 "tf (s)": f"{tf_val}",
             },
-            "CBIP Eqn 3.21 / IS 3043 — Limits surface temperature rise to prevent soil drying",
-            f"Isd = {Jsd:.6f} A/mm2 — In practice, total grid conductor area far exceeds the thermal minimum, so this condition is automatically satisfied."
+            "High current density at the conductor surface heats the surrounding soil. If temperature exceeds 100 deg C, the soil moisture evaporates, soil shrinks away from the conductor, and a high-resistance gap forms — increasing effective grid resistance permanently. In practice, the total conductor length used to control voltages is far greater than needed thermally, so actual current density is well below this limit.",
+            "CBIP Pub.339 Eqn 3.21 / IS 3043 / BS 7430:2011",
+            f"Isd = {Jsd:.6f} A/mm2 — maximum allowable. Actual current density in grid will be much lower."
         )
 
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# TAB 2 — GRID RESISTANCE
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-with t2:
-    sec("3.02 Grid Layout and Conductor Quantities")
-    col1, col2 = st.columns([1, 1], gap="large")
-
-    with col1:
-        st.markdown(f"""<table class="dtable">
-        <tr><th>Parameter</th><th>Value</th><th>How Derived</th></tr>
-        <tr><td>Grid Length — Lx</td><td class="mono">{Lx:.0f} m</td><td>Station layout drawing</td></tr>
-        <tr><td>Grid Width — Ly</td><td class="mono">{Ly:.0f} m</td><td>Station layout drawing</td></tr>
-        <tr><td>Grid Area — A = Lx x Ly</td><td class="mono">{A_grid:.0f} m2</td><td>Calculated</td></tr>
-        <tr><td>Grid Perimeter — Lp = 2(Lx + Ly)</td><td class="mono">{Lp:.0f} m</td><td>Calculated</td></tr>
-        <tr><td>Grid Diagonal — Dm</td><td class="mono">{Dm:.2f} m</td><td>sqrt(Lx2 + Ly2)</td></tr>
-        <tr><td>Mesh Spacing — D</td><td class="mono">{D} m</td><td>Design decision (3 to 8m CBIP)</td></tr>
-        <tr><td>Conductors in X direction</td><td class="mono">{n_x} runs</td><td>int(Lx/D) + 1</td></tr>
-        <tr><td>Conductors in Y direction</td><td class="mono">{n_y} runs</td><td>int(Ly/D) + 1</td></tr>
-        <tr><td>Estimated horizontal conductor Lc</td><td class="mono">{Lc_est:.0f} m</td><td>n_x x Ly + n_y x Lx (approximate)</td></tr>
-        <tr><td>Total buried conductor — Lt (from drawings)</td><td class="mono">{Lt:.0f} m</td><td>Entered from actual drawing layout</td></tr>
-        <tr><td>Ground rods — N</td><td class="mono">{N_rods} nos</td><td>{"Perimeter / " + str(rod_spacing_peri) + " m spacing" if N_rods_calc else "Entered from drawings"}</td></tr>
-        <tr><td>Rod length — L</td><td class="mono">{L_rod} m</td><td>IS 3043: minimum 3m</td></tr>
-        <tr><td>Total rod length — Lr = N x L</td><td class="mono">{Lr:.0f} m</td><td>Calculated</td></tr>
-        <tr><td>Horizontal conductor — Lc = Lt - Lr</td><td class="mono">{Lc:.0f} m</td><td>Lt minus Lr</td></tr>
+        sec("2.7 Grid Layout Geometry")
+        st.markdown(f"""<table class="dt">
+        <tr><th>Parameter</th><th>Symbol</th><th>Value</th><th>How Determined</th></tr>
+        <tr><td>Grid length</td><td class="mn">Lx</td><td class="mn">{Lx:.0f} m</td><td>Entire fenced switchyard length — from layout drawing</td></tr>
+        <tr><td>Grid width</td><td class="mn">Ly</td><td class="mn">{Ly:.0f} m</td><td>Entire fenced switchyard width — from layout drawing</td></tr>
+        <tr><td>Grid area</td><td class="mn">A = Lx x Ly</td><td class="mn">{A_grid:.0f} m2</td><td>Calculated. This is the most important geometric parameter for Rg.</td></tr>
+        <tr><td>Grid perimeter</td><td class="mn">Lp = 2(Lx+Ly)</td><td class="mn">{Lp:.0f} m</td><td>Calculated. Used to determine na and rod count.</td></tr>
+        <tr><td>Grid diagonal</td><td class="mn">Dm = sqrt(Lx2+Ly2)</td><td class="mn">{Dm:.2f} m</td><td>Calculated. Used in effective length Lm formula (CBIP Eqn 5.29).</td></tr>
+        <tr><td>Mesh spacing</td><td class="mn">D</td><td class="mn">{D} m</td><td>Design decision. CBIP: 3-8m typical. Smaller D reduces Em.</td></tr>
+        <tr><td>Burial depth</td><td class="mn">h</td><td class="mn">{h} m</td><td>CBIP: 0.5m minimum. Greater h reduces Km and Ks.</td></tr>
+        <tr><td>Conductor runs in X</td><td class="mn">n_x = int(Lx/D)+1</td><td class="mn">{n_x} runs</td><td>Calculated from grid dimensions and spacing.</td></tr>
+        <tr><td>Conductor runs in Y</td><td class="mn">n_y = int(Ly/D)+1</td><td class="mn">{n_y} runs</td><td>Calculated from grid dimensions and spacing.</td></tr>
+        <tr><td>Estimated horizontal Lc</td><td class="mn">n_x x Ly + n_y x Lx</td><td class="mn">{Lc_est:.0f} m</td><td>Approximate — use actual from drawings for final design.</td></tr>
+        <tr><td>Total buried conductor (actual)</td><td class="mn">Lt</td><td class="mn">{Lt:.0f} m</td><td>From detailed layout drawings. Example: 11000m horizontal + 90x3m rods = 11270m.</td></tr>
+        <tr><td>Ground rods (N)</td><td class="mn">N_rods</td><td class="mn">{N_rods}</td><td>{"From perimeter / "+str(rod_sp_peri)+"m spacing = ceil("+str(Lp:.0f)+"/"+str(rod_sp_peri)+")" if N_rods_auto else "Entered from drawings"}</td></tr>
+        <tr><td>Total rod length</td><td class="mn">Lr = N x L</td><td class="mn">{Lr:.0f} m</td><td>Calculated.</td></tr>
+        <tr><td>Horizontal conductor (derived)</td><td class="mn">Lc = Lt - Lr</td><td class="mn">{Lc:.0f} m</td><td>Calculated from Lt and Lr.</td></tr>
         </table>""", unsafe_allow_html=True)
 
-        info(f"Auto-estimate of horizontal conductor = {Lc_est:.0f} m. Actual from drawings = {Lc:.0f} m. Always use the drawing-based value (Lt_manual input) for final design. The auto-estimate is for preliminary checks only.")
-
-        sec("3.02 Grid Earth Resistance — IEEE Std 80 Eqn / CBIP Eqn 5.32")
-        fblock(
-            "Rg = rho x [ 1/Lt  +  (1/sqrt(20 x A)) x (1 + 1/(1 + h x sqrt(20/A))) ]",
-            {
-                "Rg (ohm)": "Grid resistance to remote earth",
-                "rho (ohm-m)": f"{rho}",
-                "Lt (m)": f"{Lt:.0f} — total buried conductor (horizontal + rods)",
-                "A (m2)": f"{A_grid:.0f} — grid enclosed area",
-                "h (m)": f"{h} — burial depth",
-                "sqrt(20A)": f"sqrt(20 x {A_grid:.0f}) = {sqrt_20A:.4f}",
-                "h x sqrt(20/A)": f"{h} x sqrt(20/{A_grid:.0f}) = {h} x {sqrt_20_A:.6f} = {h*sqrt_20_A:.6f}",
-                "(1 + ...)": f"1 + 1/(1 + {h*sqrt_20_A:.6f}) = {1+1/(1+h*sqrt_20_A):.6f}",
-            },
-            "IEEE Std 80-2013 Eq.52 / CBIP Manual Pub.339 Eqn 5.32 (Sverak formula)",
-            f"Rg = {rho} x [1/{Lt:.0f} + {(1+1/(1+h*sqrt_20_A))/sqrt_20A:.8f}] = {Rg:.4f} ohm"
-        )
-        (res_pass if rg_ok else res_note)(
-            f"Grid Resistance Rg = {Rg:.4f} ohm. {'Less than 1.0 ohm. Requirement satisfied.' if rg_ok else 'Exceeds 1.0 ohm. Review design — increase grid area or add soil enhancement.'}"
-        )
-
-    with col2:
-        sec("3.03 Earth Rod Resistance")
-        info("The formula below uses cm units, consistent with the original GSECL / ALSTOM calculation for this project. L and d are in cm, rho in ohm-cm.")
-        fblock(
-            "Re = (1/N) x [ (100 x rho_ohm_cm) / (2 x pi x L_cm) ] x ln(4 x L_cm / d_cm)",
-            {
-                "N": f"{N_rods} — number of ground rods",
-                "rho (ohm-m)": f"{rho} ohm-m = {rho*100:.0f} ohm-cm",
-                "L (cm)": f"{L_rod} m = {L_rod*100:.0f} cm — rod length",
-                "d (cm)": f"{d_rod} mm = {d_rod/10:.2f} cm — rod diameter",
-                "100 x rho_cm / (2 pi L_cm)": f"100 x {rho*100:.0f} / (2 x pi x {L_rod*100:.0f}) = {100*rho*100/(2*math.pi*L_rod*100):.4f}",
-                "ln(4L/d)": f"ln(4 x {L_rod*100:.0f} / {d_rod/10:.2f}) = ln({4*L_rod*100/(d_rod/10):.2f}) = {math.log(4*L_rod*100/(d_rod/10)):.4f}",
-            },
-            "IEEE Std 80 / IS 3043 — Rod electrode resistance formula (cm unit version as used in GSECL project)",
-            f"Re_single = {100*rho*100/(2*math.pi*L_rod*100)*math.log(4*L_rod*100/(d_rod/10)):.4f} ohm.   Re = {100*rho*100/(2*math.pi*L_rod*100)*math.log(4*L_rod*100/(d_rod/10))/N_rods:.4f} ohm"
-        )
-
-        if N_pits > 0 and Re_pits is not None:
-            sec("3.03 Separate Earth Pit Resistance")
-            fblock(
-                "Re_pits = (1/N_pits) x [(100 x rho_cm) / (2 pi L_cm)] x ln(4L_cm / d_cm)",
-                {
-                    "N_pits": f"{N_pits} — number of separate earth pits",
-                    "rho (ohm-cm)": f"{rho*100:.0f}",
-                    "L (cm)": f"{L_rod*100:.0f}",
-                    "d (cm)": f"{d_rod/10:.2f}",
-                },
-                "GSECL project calculation method — ALSTOM / DESEIN Sec 3.03",
-                f"Re_pits = {Re_pits:.4f} ohm"
-            )
-
-            sec("3.03 Combined Grid and Earth Pit Resistance")
-            fblock(
-                "Rcombined = Rg x Re_pits / (Rg + Re_pits)",
-                {
-                    "Rg (ohm)": f"{Rg:.4f}",
-                    "Re_pits (ohm)": f"{Re_pits:.4f}",
-                },
-                "Parallel combination of grid and separate earth pits",
-                f"Rcombined = {Rg:.4f} x {Re_pits:.4f} / ({Rg:.4f} + {Re_pits:.4f}) = {Rcomb:.4f} ohm"
-            )
-            (res_pass if Rcomb <= 1.0 else res_fail)(
-                f"Combined earth resistance = {Rcomb:.4f} ohm. {'Less than 1.0 ohm. Acceptable.' if Rcomb <= 1.0 else 'Exceeds 1.0 ohm.'}"
-            )
-
-        sec("Summary — Resistance")
-        mcards([
-            ("Grid Rg", f"{Rg:.4f}", "ohm", "pass" if rg_ok else "warn"),
-            ("Earth Pits Re", f"{Re_pits:.4f}" if Re_pits else "N/A", "ohm", "blue"),
-            ("Combined", f"{Rcomb:.4f}", "ohm", "pass" if Rcomb <= 1.0 else "warn"),
-            ("Target", "less than 1.0", "ohm", "blue"),
-        ])
-
-        sec("Notes on Grid Resistance")
-        info("CBIP Sec 3.5 and IEEE Std 80 Sec 1: There is no absolute fixed limit on Rg in the standard. Safety is judged by Em < Etouch and Es < Estep. The 1.0 ohm requirement is a typical project specification, not a code mandate.")
-        info("To reduce Rg: Increase grid area — most effective, Rg is proportional to rho/sqrt(A). Adding more conductor length at the same area has minimal effect on Rg per CBIP Sec 3.11.1.")
-        info("If high Rg persists despite large grid: Bentonite clay backfill (rho = 8.7 ohm-m), deep driven rods penetrating low-resistivity stratum, or satellite earth electrode. CBIP Chapter 6.")
+        if N_rods_auto:
+            rinfo(f"Rod count auto-calculated: Perimeter Lp = {Lp:.0f} m. One rod every {rod_sp_peri} m: N = ceil({Lp:.0f}/{rod_sp_peri}) = {N_rods} rods. Example from published calculations: 90 rods on 1100m perimeter = approximately one rod per 12m.")
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# TAB 3 — GRID CURRENT AND GPR
+# PHASE 3 — SAFETY LIMITS
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-with t3:
-    col1, col2 = st.columns([1, 1], gap="large")
-
-    with col1:
-        sec("3.04 Maximum Grid Current — CBIP Eqn 3.16 / IEEE 80 Cl.15")
-        st.markdown(f"""
-        <div class="card" style="font-size:0.8rem;color:#2c3e50;line-height:1.85">
-        Not all of the earth fault current (If) flows through the grid into the soil.
-        A fraction returns to the source via overhead earth wires of transmission lines and cable sheaths
-        without entering the soil at all.<br><br>
-        <b>Sf (Current Division Factor)</b> is the fraction of If that actually flows between the grid
-        and surrounding soil. Sf = 1.0 is the conservative case (all current through grid soil).<br><br>
-        <b>Df (Decrement Factor)</b> accounts for the DC offset present in the initial cycles of a fault.
-        The asymmetrical current is larger than the symmetrical rms value. For fault duration >= 0.5s
-        (30 cycles), IEEE 80-2013 Cl.15.10 allows Df = 1.0.<br><br>
-        Sf = {Sf} was used in this design
-        ({"all current into grid — conservative, used when earth wire data is not available" if Sf == 1.0
-        else f"{int(Sf*100)}% of fault current flows through grid soil, {int((1-Sf)*100)}% returns via earth wires"}).
-        </div>
-        """, unsafe_allow_html=True)
-
-        sp(0.3)
-        fblock(
-            "IG = If x Sf x Df",
-            {
-                "If (A)": f"{If_A:.0f} A = {If_kA} kA — total earth fault current",
-                "Sf": f"{Sf} — current division factor (fraction flowing into earth grid)",
-                "Df": f"{Df} — decrement factor (DC offset correction)",
-                "IG (A)": "Maximum grid current — used for all GPR and voltage calculations",
-            },
-            "CBIP Manual Pub.339 Sec 3.7.2 Eqn 3.16 / IEEE Std 80-2013 Cl.15",
-            f"IG = {If_A:.0f} x {Sf} x {Df} = {IG:.0f} A = {IG_kA:.4f} kA"
-        )
-
-        sec("3.05 Ground Potential Rise — CBIP Sec 3.5")
-        fblock(
-            "GPR = IG x Rg",
-            {
-                "GPR (V)": "Maximum voltage of earthing grid relative to remote earth during fault",
-                "IG (A)": f"{IG:.0f} A",
-                "Rg (ohm)": f"{Rg:.4f} ohm",
-            },
-            "CBIP Manual Pub.339 Sec 3.5 and 3.7 / IEEE Std 80-2013",
-            f"GPR = {IG:.0f} x {Rg:.4f} = {GPR:.2f} V = {GPR/1000:.4f} kV"
-        )
-
-    with col2:
-        sec("Results")
-        mcards([
-            ("Fault Current If", f"{If_kA}", "kA", "blue"),
-            ("Division Factor Sf", f"{Sf}", "", "blue"),
-            ("Decrement Factor Df", f"{Df}", "", "blue"),
-            ("Grid Current IG", f"{IG:.0f}", "A", "blue"),
-        ])
-        sp(0.3)
-        mcards([
-            ("Grid Resistance Rg", f"{Rg:.4f}", "ohm", "blue"),
-            ("GPR = IG x Rg", f"{GPR:.2f}", "V", "blue"),
-            ("GPR", f"{GPR/1000:.4f}", "kV", "blue"),
-        ], cols=3)
-
-        sec("3.07 GPR vs Permissible Touch Voltage Check — IEEE 80 Sec 15.1")
-        st.markdown(f"""<p style="font-size:0.8rem;color:#2c3e50;margin-bottom:0.5rem;line-height:1.7">
-        IEEE Std 80-2013 Sec 15.1 states: If the GPR is below the tolerable touch voltage,
-        no further analysis is needed.<br>
-        Permissible touch voltage Etouch (calculated in Step 4) = <b>{Etouch:.2f} V</b>
-        </p>""", unsafe_allow_html=True)
-
-        if GPR > Etouch:
-            res_note(f"GPR = {GPR:.2f} V exceeds Etouch permissible = {Etouch:.2f} V. This is expected for most large substations. Further evaluation of actual mesh voltage Em is required (Step 5). GPR being higher than Etouch does not mean the design is unsafe — the actual mesh voltage Em may still be acceptable.")
-        else:
-            res_pass(f"GPR = {GPR:.2f} V is less than Etouch permissible = {Etouch:.2f} V. The grid design is inherently safe. Mesh voltage check is still recommended as a good practice.")
-
-        sec("Transferred Potential — CBIP Sec 3.11.2")
-        info(f"GPR = {GPR:.0f} V is the maximum transferred potential. Any metallic conductor entering or leaving the station — cable sheaths, water pipes, gas pipes, telephone cables, rails — can transfer this voltage to remote areas where safety precautions may not exist.")
-        info("Required measures: Isolating transformers or SPD on all control and telecom circuits. Insulating joints on water and gas pipe at station boundary. Optical fibre preferred for communication. LV supply neutral must not be connected to earth outside station area. CBIP Sec 5.3.10 and IS 2309.")
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# TAB 4 — SAFETY VOLTAGE LIMITS
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-with t4:
-    sec("3.06 Calculation of Tolerable Step and Touch Voltage")
-    info("The permissible touch and step voltages depend on three things: the maximum body current a person can withstand (which depends on shock duration), the human body resistance, and the additional foot resistance due to the surface layer material. A higher surface layer resistivity (concrete or crushed rock) allows higher permissible voltages.")
+with t_p3:
+    phase(3, "Permissible Safety Voltage Limits — Tolerable Touch and Step Voltage")
+    rinfo("Phase 3 calculates the maximum voltages a person can safely tolerate. These are the UPPER LIMITS. The actual voltages (Em and Es computed in Phase 5) must be below these limits. The limits depend on the fault clearing speed (ts) and the surface material (rho_s, hs).")
     sp(0.3)
 
-    col1, col2 = st.columns([1, 1], gap="large")
+    col1, col2 = st.columns([1,1], gap="large")
     with col1:
-        sec("Permissible Body Current — CBIP Eqn 3.1 / IEEE 80")
-        fblock(
+        sec("3.1 The Human Safety Model — How Electric Shock Kills")
+        st.markdown("""
+        <div class="card" style="font-size:0.8rem;color:#1a2e40;line-height:1.85">
+        <b>What is ventricular fibrillation?</b><br>
+        The heart is controlled by electrical impulses. If external current flows through the
+        heart region, it disrupts the natural rhythm. At currents above about 50-100 mA,
+        the heart muscle fibers start twitching in an uncoordinated way (fibrillation)
+        instead of pumping. Blood circulation stops. Death follows within minutes unless
+        defibrillated. This is why electric shocks can be fatal even at relatively low voltages.<br><br>
+        <b>Two dangerous scenarios:</b><br>
+        1. Touch voltage: Person stands on the ground and touches an earthed equipment body.
+           Current enters the hand, travels through the body, exits through both feet.
+           The circuit includes body resistance Rb = 1000 ohm plus two feet in parallel
+           on the surface. Foot resistance = rho_s / 4b per foot (disc electrode, b = 0.08m radius)
+           = 3 x rho_s ohm each. In parallel: 1.5 x rho_s ohm.<br><br>
+        2. Step voltage: Person walks near the fault area. One foot is on higher potential
+           than the other (1 metre apart = one stride). Current enters the high-potential foot,
+           travels through the body, exits the low-potential foot. Two feet in series:
+           3 x rho_s + 3 x rho_s = 6 x rho_s ohm.<br><br>
+        <b>Why does the surface layer help?</b><br>
+        Concrete or crushed rock has rho_s = 3000 ohm-m — much higher than natural soil.
+        Higher foot resistance = lower body current for the same voltage = safer.
+        </div>""", unsafe_allow_html=True)
+
+        sec("3.2 Maximum Permissible Body Current (CBIP Eqn 3.1 / IEEE 80)")
+        fb(
             "Ib = 0.116 / sqrt(ts)",
             {
-                "Ib (A)": "Maximum body current: 99.5% of persons survive without ventricular fibrillation",
-                "0.116": "k/1000 = 116 mA. Constant for 50 kg body weight. Statistically determined. CBIP Sec 3.6.2.",
+                "Ib (A)": "Maximum body current that 99.5% of persons can withstand without ventricular fibrillation",
+                "0.116": "= k/1000 where k = 116 mA. For 50 kg body weight. Statistically determined. CBIP Sec 3.6.2 and IEEE 80.",
                 "ts (s)": f"{ts_val} s — shock contact duration (primary relay clearing time)",
+                "Derivation": "Based on Dalziel's research: energy absorbed by body = IB^2 x ts = constant (k^2/1000^2). For 50 kg person: k = 116 mA.",
             },
-            "CBIP Pub.339 Sec 3.6.2 Eqn 3.1 / IEEE Std 80-2013",
+            "The constant 0.116 (116 mA) corresponds to the current level at which 99.5% of 50 kg persons do NOT experience ventricular fibrillation. This means 0.5% of persons at 116 mA MIGHT fibrillate — it is a statistical safety limit. For heavier persons (70 kg), IEEE 80 allows 0.157/sqrt(ts). CBIP uses 50 kg as the conservative standard.",
+            "CBIP Manual Pub.339 Sec 3.6.2 Eqn 3.1. IEEE Std 80-2013. Based on C.F. Dalziel research (University of California Berkeley, 1950s-1960s).",
             f"Ib = 0.116 / sqrt({ts_val}) = 0.116 / {math.sqrt(ts_val):.4f} = {Ib*1000:.3f} mA = {Ib:.6f} A"
         )
 
-        sec("Surface Layer Reduction Factor — IEEE 80 Eq.27 / CBIP Eqn 5.9")
-        st.markdown("""<div style="font-size:0.79rem;color:#2c3e50;line-height:1.7;margin-bottom:0.5rem">
-        The concrete or crushed rock surface layer is high resistivity, which increases the contact resistance
-        at the feet and thus raises the permissible voltage. However, the layer has finite thickness hs.
-        Cs corrects for the fact that the full surface resistivity benefit is not achieved with a thin layer.
-        If no surface layer is used, Cs = 1.0 (no benefit, rho_s = rho of natural soil).
-        </div>""", unsafe_allow_html=True)
-
-        fblock(
-            "Cs = 1 - [ 0.09 x (1 - rho/rho_s) / (2 x hs + 0.09) ]",
+        sec("3.3 Surface Layer Reduction Factor Cs (IEEE 80 Eq.27 / CBIP Eqn 5.9)")
+        fb(
+            "Cs = 1 - [ 0.09 x (1 - rho / rho_s) / (2 x hs + 0.09) ]",
             {
-                "rho (ohm-m)": f"{rho}",
-                "rho_s (ohm-m)": f"{rho_s}",
-                "hs (m)": f"{h_s}",
-                "Reflection factor K": f"(rho - rho_s) / (rho + rho_s) = ({rho} - {rho_s}) / ({rho} + {rho_s}) = {(rho-rho_s)/(rho+rho_s):.4f}",
-                "(1 - rho/rho_s)": f"1 - {rho}/{rho_s} = {1-rho/rho_s:.5f}",
-                "0.09 x (...)": f"0.09 x {1-rho/rho_s:.5f} = {0.09*(1-rho/rho_s):.5f}",
-                "(2hs + 0.09)": f"2 x {h_s} + 0.09 = {2*h_s+0.09:.3f}",
+                "Cs": "Reduction factor — accounts for finite thickness of surface layer",
+                "rho (ohm-m)": f"{rho} — soil resistivity below the surface layer",
+                "rho_s (ohm-m)": f"{rho_s} — surface layer (concrete / crushed rock) resistivity",
+                "hs (m)": f"{h_s} — surface layer thickness",
+                "K = (rho-rho_s)/(rho+rho_s)": f"Reflection factor = ({rho}-{rho_s})/({rho}+{rho_s}) = {(rho-rho_s)/(rho+rho_s):.4f}",
+                "(1-rho/rho_s)": f"1 - {rho}/{rho_s} = {1-rho/rho_s:.5f}",
+                "Numerator": f"0.09 x {1-rho/rho_s:.5f} = {0.09*(1-rho/rho_s):.5f}",
+                "Denominator": f"2 x {h_s} + 0.09 = {2*h_s+0.09:.3f}",
             },
-            "IEEE Std 80-2000 Equation 27 / CBIP Pub.339 Eqn 5.9",
+            "The foot electrode (human foot) is modelled as a conducting disc of radius b = 0.08m on the surface. For an infinitely deep uniform layer of resistivity rho_s, foot resistance = rho_s/(4b) = 3 x rho_s. But the surface layer has finite thickness hs — below it is the natural soil of resistivity rho. Cs = 1.0 means full benefit. If no surface layer: Cs = 1.0 and rho_s must be set equal to rho (natural soil).",
+            "IEEE Std 80-2000 Equation 27 = CBIP Pub.339 Eqn 5.9. More accurate alternate: CBIP Eqn 3.11 (Seedher-Arora formula). Reference calculation used IEEE Eq.27.",
             f"Cs = 1 - ({0.09*(1-rho/rho_s):.5f} / {2*h_s+0.09:.3f}) = {Cs:.4f}"
         )
 
     with col2:
-        sec("Permissible Touch Voltage — CBIP Eqn 3.10 / IEEE Eqn B.6")
-        st.markdown("""<div style="font-size:0.79rem;color:#2c3e50;line-height:1.7;margin-bottom:0.5rem">
+        sec("3.4 Permissible Touch Voltage (CBIP Eqn 3.10 / IEEE Std 80 Eqn B.6)")
+        st.markdown("""<div style="font-size:0.79rem;color:#1a2e40;line-height:1.7;margin-bottom:0.5rem">
         Touch voltage circuit: Current flows from hand (in contact with earthed equipment) through body
         (Rb = 1000 ohm) and out through both feet in parallel standing on the surface.
         Two feet in parallel, each = 3 x rho_s ohm (disc electrode formula, b = 0.08m).
         Total foot resistance = 1.5 x rho_s ohm.
         </div>""", unsafe_allow_html=True)
-        fblock(
+        fb(
             "Etouch = Ib x (Rb + 1.5 x rho_s x Cs)",
             {
-                "Etouch (V)": "Maximum permissible touch voltage",
+                "Etouch (V)": "Maximum permissible touch voltage — actual Em must be below this",
                 "Ib (A)": f"{Ib:.6f} A = {Ib*1000:.3f} mA",
-                "Rb (ohm)": "1000 ohm — standard human body resistance for 50 kg person",
-                "1.5 x rho_s x Cs": f"1.5 x {rho_s} x {Cs:.4f} = {1.5*rho_s*Cs:.3f} ohm (two feet in parallel on surface)",
-                "Total resistance": f"1000 + {1.5*rho_s*Cs:.3f} = {1000+1.5*rho_s*Cs:.3f} ohm",
+                "Rb (ohm)": "1000 ohm — standard human body resistance for 50 kg person. IEEE 80 Sec 7.",
+                "1.5 x rho_s x Cs": f"1.5 x {rho_s} x {Cs:.4f} = {1.5*rho_s*Cs:.3f} ohm — resistance of two feet in PARALLEL on surface",
+                "Derivation of 1.5": "Each foot = disc electrode = rho_s/(4b) = rho_s/0.32 = 3.125 x rho_s ohm. Two feet in parallel = 3.125 x rho_s / 2 = 1.5625 x rho_s ohm. Rounded to 1.5 x rho_s.",
+                "Total circuit R": f"Rb + 1.5 x rho_s x Cs = 1000 + {1.5*rho_s*Cs:.3f} = {1000+1.5*rho_s*Cs:.3f} ohm",
             },
-            "CBIP Pub.339 Sec 3.6.2 Eqn 3.10 / IEEE Std 80-2013 Eqn B.6",
-            f"Etouch = {Ib:.6f} x {1000+1.5*rho_s*Cs:.3f} = {Etouch:.2f} V"
+            "Ohm's law: Etouch = Ib x (total circuit resistance). For the person to be safe, Etouch must be less than or equal to Ib x (Rb + foot resistance).",
+            "CBIP Pub.339 Sec 3.6.2 Eqn 3.10. IEEE Std 80-2013 Eqn B.6.",
+            f"Etouch = {Ib:.6f} x ({1000+1.5*rho_s*Cs:.3f}) = {Etouch:.2f} V"
         )
 
-        sec("Permissible Step Voltage — CBIP Eqn 3.9 / IEEE Eqn B.6")
-        st.markdown("""<div style="font-size:0.79rem;color:#2c3e50;line-height:1.7;margin-bottom:0.5rem">
+        sec("3.5 Permissible Step Voltage (CBIP Eqn 3.9 / IEEE Std 80 Eqn B.6)")
+        st.markdown("""<div style="font-size:0.79rem;color:#1a2e40;line-height:1.7;margin-bottom:0.5rem">
         Step voltage circuit: Current flows in through one foot, through body, out through the other foot.
         Feet are 1 metre apart (one step). Each foot = 3 x rho_s ohm. Two feet in series = 6 x rho_s ohm.
         </div>""", unsafe_allow_html=True)
-        fblock(
+        fb(
             "Estep = Ib x (Rb + 6 x rho_s x Cs)",
             {
-                "Estep (V)": "Maximum permissible step voltage",
-                "6 x rho_s x Cs": f"6 x {rho_s} x {Cs:.4f} = {6*rho_s*Cs:.3f} ohm (two feet in series, 1m step distance)",
+                "Estep (V)": "Maximum permissible step voltage — actual Es must be below this",
+                "Ib (A)": f"{Ib:.6f} A",
+                "6 x rho_s x Cs": f"6 x {rho_s} x {Cs:.4f} = {6*rho_s*Cs:.3f} ohm — resistance of two feet in SERIES with 1m spacing",
+                "Derivation of 6": "Each foot = 3.125 x rho_s ohm. Two feet in series (1m stride) = 6.25 x rho_s ohm. Rounded to 6 x rho_s.",
+                "Total circuit R": f"Rb + 6 x rho_s x Cs = 1000 + {6*rho_s*Cs:.3f} = {1000+6*rho_s*Cs:.3f} ohm",
+                "Why step > touch allowance": "Step circuit has two feet in series = 2x higher foot resistance. Higher voltage is needed to push dangerous current through the body.",
             },
-            "CBIP Pub.339 Sec 3.6.2 Eqn 3.9 / IEEE Std 80-2013 Eqn B.6",
-            f"Estep = {Ib:.6f} x {1000+6*rho_s*Cs:.3f} = {Estep_perm:.2f} V"
+            "In a step voltage scenario, both contact points are on the ground (feet). Total resistance = Rb + 2 x (3 x rho_s) = Rb + 6 x rho_s. This is HIGHER than the touch voltage circuit, so a higher voltage is permissible.",
+            "CBIP Pub.339 Sec 3.6.2 Eqn 3.9. IEEE Std 80-2013 Eqn B.6.",
+            f"Estep = {Ib:.6f} x ({1000+6*rho_s*Cs:.3f}) = {Estep_perm:.2f} V"
         )
 
-        sec("Summary of Safety Limits")
+        sec("3.6 Results Summary")
         mcards([
-            ("Body Current Ib", f"{Ib*1000:.3f}", "mA", "blue"),
-            ("Cs factor", f"{Cs:.4f}", "", "blue"),
-            ("Etouch permissible", f"{Etouch:.2f}", "V", "blue"),
-            ("Estep permissible", f"{Estep_perm:.2f}", "V", "blue"),
+            ("Body Current Ib", f"{Ib*1000:.3f}", "mA", "bl"),
+            ("Cs", f"{Cs:.4f}", "", "bl"),
+            ("Etouch permissible", f"{Etouch:.2f}", "V", "bl"),
+            ("Estep permissible", f"{Estep_perm:.2f}", "V", "bl"),
         ])
 
-        sec("Effect of Surface Layer")
-        st.markdown(f"""<table class="dtable">
-        <tr><th>Condition</th><th>Etouch (V)</th><th>Estep (V)</th></tr>
-        <tr><td>With surface layer (Cs = {Cs:.4f}, rho_s = {rho_s} ohm-m)</td>
-            <td class="mono pass">{Etouch:.2f}</td><td class="mono">{Estep_perm:.2f}</td></tr>
-        <tr><td>Without surface layer (Cs = 1.0, rho_s = rho = {rho} ohm-m)</td>
-            <td class="mono">{Et_bare:.2f}</td><td class="mono">{Es_bare:.2f}</td></tr>
-        <tr><td>Improvement factor from surface layer</td>
-            <td class="mono">{Etouch/Et_bare:.2f}x</td><td class="mono">{Estep_perm/Es_bare:.2f}x</td></tr>
+        sec("3.7 Effect of Surface Layer — Why It Matters")
+        st.markdown(f"""<table class="dt">
+        <tr><th>Condition</th><th>Etouch (V)</th><th>Estep (V)</th><th>Improvement</th></tr>
+        <tr class="hl"><td>WITH surface layer (Cs={Cs:.4f}, rho_s={rho_s} ohm-m, hs={h_s}m)</td>
+            <td class="mn ps">{Etouch:.2f}</td><td class="mn">{Estep_perm:.2f}</td>
+            <td class="mn">Design condition</td></tr>
+        <tr><td>WITHOUT surface layer (Cs=1.0, rho_s = natural soil = {rho} ohm-m)</td>
+            <td class="mn">{Et_bare:.2f}</td><td class="mn">{Es_bare:.2f}</td>
+            <td class="mn">Baseline</td></tr>
+        <tr><td>Ratio (with / without)</td>
+            <td class="mn">{Etouch/Et_bare:.2f}x higher</td>
+            <td class="mn">{Estep_perm/Es_bare:.2f}x higher</td>
+            <td class="mn">Benefit of surface layer</td></tr>
         </table>
-        <p style="font-size:0.74rem;color:#5a6a7a;margin-top:0.4rem;line-height:1.6">
-        CBIP Sec 3.6.2: Surface layer of crushed rock or concrete (rho_s = 3000 ohm-m) is strongly
-        recommended throughout the switchyard. It significantly raises the permissible voltage limits
-        and is always provided unless EPR is extremely low.
+        <p style="font-size:0.73rem;color:#1a2e40;margin-top:0.4rem;line-height:1.6">
+        CBIP Pub.339 Sec 3.6.2: Crushed rock or concrete surface layer (rho_s = 3000 ohm-m) is strongly
+        recommended throughout the switchyard. Without this layer, the permissible limits would be
+        {Et_bare:.0f} V (touch) and {Es_bare:.0f} V (step), making design much harder to satisfy.
         </p>""", unsafe_allow_html=True)
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# TAB 5 — MESH AND STEP VOLTAGE
+# PHASE 4 — RESISTANCE AND GPR
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-with t5:
-    sec("3.08 and 3.09 Calculation of Maximum Attainable Mesh and Step Voltage")
-    info("The mesh voltage Em is the maximum touch voltage within the grid — it occurs at the centre of the corner meshes. The step voltage Es is the maximum step voltage — it occurs just outside the corner of the grid. These calculated values must be less than the respective permissible limits from Step 4.")
+with t_p4:
+    phase(4, "Grid Resistance, Earth Electrode Resistance, and Ground Potential Rise")
+    rinfo("Phase 4 computes the electrical resistance of the earthing system to remote earth. This governs the Ground Potential Rise (GPR = IG x Rg), which is the maximum voltage the grid rises to during a fault. Lower Rg means lower GPR means safer design.")
     sp(0.3)
 
-    col1, col2 = st.columns([1, 1], gap="large")
+    col1, col2 = st.columns([1,1], gap="large")
     with col1:
-        sec("Geometric Factors — CBIP Eqn 5.14 to 5.22 / IEEE 80")
-        st.markdown(f"""<table class="dtable">
-        <tr><th>Factor</th><th>Formula</th><th>Calculated Value</th><th>Reference</th></tr>
-        <tr><td>na</td><td class="mono">2 x Lc / Lp</td>
-            <td class="mono">2 x {Lc:.0f} / {Lp:.0f} = {na:.4f}</td><td>CBIP Eqn 5.19 / IEEE B.18</td></tr>
-        <tr><td>nb</td><td class="mono">[Lp / (4 x sqrt(A))]^0.5</td>
-            <td class="mono">[{Lp:.0f} / (4 x {math.sqrt(A_grid):.3f})]^0.5 = {nb:.4f}</td><td>CBIP Eqn 5.20</td></tr>
-        <tr><td>nc, nd</td><td class="mono">1.0 for rectangular grid</td>
-            <td class="mono">1.0</td><td>CBIP Eqn 5.21 / IEEE B.17</td></tr>
-        <tr><td>n = na x nb x nc x nd</td><td class="mono">Effective parallel conductors</td>
-            <td class="mono">{n:.4f}</td><td>CBIP Eqn 5.18</td></tr>
-        <tr><td>ho (reference depth)</td><td class="mono">1.0 m (standard)</td>
-            <td class="mono">1.0 m</td><td>IEEE 80 definition</td></tr>
-        <tr><td>Kh = sqrt(1 + h/ho)</td><td class="mono">sqrt(1 + {h}/1)</td>
-            <td class="mono">{Kh:.4f}</td><td>CBIP Eqn 5.17 / IEEE B.14</td></tr>
-        <tr><td>Kii</td><td class="mono">1.0 — rods in corners / periphery</td>
-            <td class="mono">1.0</td><td>CBIP Eqn 5.16</td></tr>
-        <tr><td>Ki = Kim = Kis</td><td class="mono">0.644 + 0.148 x n</td>
-            <td class="mono">0.644 + 0.148 x {n:.4f} = {Kim:.4f}</td><td>CBIP Eqn 5.22 / IEEE B.16</td></tr>
-        <tr><td>Km — mesh factor</td><td class="mono">Full formula — CBIP Eqn 5.14</td>
-            <td class="mono">{Km:.4f}</td><td>CBIP Eqn 5.14 / IEEE B.13</td></tr>
-        <tr><td>Ks — step factor</td><td class="mono">Full formula — CBIP Eqn 5.15</td>
-            <td class="mono">{Ks:.4f}</td><td>CBIP Eqn 5.15 / IEEE B.15</td></tr>
+        sec("4.1 Grid Current IG (CBIP Eqn 3.16)")
+        fb(
+            "IG = If x Sf x Df",
+            {
+                "If (A)": f"{If_A:.0f} A = {If_kA} kA — total single line-to-earth fault current",
+                "Sf": f"{Sf} — current division factor (fraction entering earth grid from soil)",
+                "Df": f"{Df} — decrement factor (DC offset correction for initial fault cycles)",
+                "IG (A)": "Design grid current — current flowing between grid conductors and surrounding soil",
+            },
+            "IG is the current that actually creates the EPR and the voltage gradients on the earth surface. If flows from the source to the fault, but part of it returns via earth/shield wires of overhead lines (Sf accounts for this division). The decrement factor Df corrects for the DC component in the initial fault cycles.",
+            "CBIP Pub.339 Sec 3.7.2 Eqn 3.16. IEEE Std 80-2013 Cl.15.",
+            f"IG = {If_A:.0f} x {Sf} x {Df} = {IG:.0f} A = {IG_kA:.4f} kA"
+        )
+
+        sec("4.2 Grid Earth Resistance — Sverak Formula (IEEE Std 665 / CBIP Eqn 5.32)")
+        st.markdown(f"""
+        <div style="font-size:0.79rem;color:#1a2e40;line-height:1.7;margin-bottom:0.5rem">
+        The grid earth resistance Rg is the resistance between the buried grid electrode and
+        a theoretical point at infinite distance (remote earth). It is a function of:
+        (1) soil resistivity rho, (2) total conductor length Lt,
+        (3) grid area A, and (4) burial depth h.
+        </div>""", unsafe_allow_html=True)
+        fb(
+            "Rg = rho x [ 1/Lt  +  (1/sqrt(20 x A)) x (1 + 1/(1 + h x sqrt(20/A))) ]",
+            {
+                "Rg (ohm)": "Grid earth resistance to remote earth",
+                "rho (ohm-m)": f"{rho} — soil resistivity",
+                "Lt (m)": f"{Lt:.0f} — total buried conductor = horizontal Lc + rod length Lr",
+                "A (m2)": f"{A_grid:.0f} — grid enclosed area = Lx x Ly",
+                "h (m)": f"{h} — conductor burial depth",
+                "First term rho/Lt": f"{rho}/{Lt:.0f} = {rho/Lt:.6f} — contribution from total conductor length",
+                "sqrt(20A)": f"sqrt(20 x {A_grid:.0f}) = {s20A:.4f}",
+                "sqrt(20/A)": f"sqrt(20/{A_grid:.0f}) = {s20_A:.6f}",
+                "h x sqrt(20/A)": f"{h} x {s20_A:.6f} = {h*s20_A:.6f}",
+                "Second term complete": f"(1/{s20A:.4f}) x (1 + 1/(1 + {h*s20_A:.6f})) = {(1+1/(1+h*s20_A))/s20A:.8f}",
+            },
+            "This is the Sverak formula (IEEE Std 665, CBIP Eqn 5.32). It has two terms: the first (rho/Lt) captures the effect of total conductor length. The second term captures the effect of grid area and burial depth. Formula accuracy is approximately plus or minus 20 percent for uniform soil. CBIP note: Increasing Lt at constant A has diminishing returns on Rg — increasing A is far more effective.",
+            "IEEE Std 665 / CBIP Pub.339 Eqn 5.32 (Sverak formula). Alternate: Thapar formula CBIP Eqn 5.33.",
+            f"Rg = {rho} x [1/{Lt:.0f} + {(1+1/(1+h*s20_A))/s20A:.8f}] = {rho} x {1/Lt + (1+1/(1+h*s20_A))/s20A:.8f} = {Rg:.4f} ohm"
+        )
+        (rpass if rg_ok else rnote)(
+            f"Grid Resistance Rg = {Rg:.4f} ohm. {'Less than 1.0 ohm. Specification satisfied.' if rg_ok else 'Exceeds 1.0 ohm. Typically specified as less than 1.0 ohm. Review design. Note: CBIP has no absolute Rg limit — the safety check Em vs Etouch is what matters.'}"
+        )
+
+    with col2:
+        sec("4.3 Earth Rod and Separate Pit Resistance (IS 3043 / CBIP Eqn 5.1)")
+        rinfo("The formula below uses cm units — consistent with published project calculations for this type of work. L and d in cm, rho in ohm-cm. This is equivalent to the standard CBIP Eqn 5.1 formula in metre units.")
+        fb(
+            "Re_single = [ (100 x rho_ohm_cm) / (2 x pi x L_cm) ] x ln(4 x L_cm / d_cm)",
+            {
+                "Re_single (ohm)": "Resistance of one vertical rod or pipe electrode",
+                "rho (ohm-m)": f"{rho} ohm-m = {rho_cm:.0f} ohm-cm (multiply by 100 to convert)",
+                "L (m) = L_cm (cm)": f"{L_rod} m = {Lcm:.0f} cm — rod length",
+                "d (mm) = d_cm (cm)": f"{d_rod} mm = {d_rcm/10:.2f} cm — rod diameter",
+                "Factor 100 in numerator": "Converts rho from ohm-m units to make formula internally consistent in cm units",
+                "100 x rho_cm / (2 pi L_cm)": f"100 x {rho_cm:.0f} / (2 x pi x {Lcm:.0f}) = {100*rho_cm/(2*math.pi*Lcm):.4f}",
+                "ln(4L/d)": f"ln(4 x {Lcm:.0f} / {d_rcm/10:.2f}) = ln({4*Lcm/(d_rcm/10):.2f}) = {math.log(4*Lcm/(d_rcm/10)):.4f}",
+                "Re for N rods in parallel": f"{Re_rod_single:.4f} / {N_rods} = {Re_grid_rods:.4f} ohm",
+            },
+            "The vertical rod electrode is modelled as a line source in a uniform infinite medium. The formula gives the resistance between the rod surface and remote earth. When multiple rods are present, mutual interference reduces effectiveness — utilization factor eta corrects for this.",
+            "CBIP Pub.339 Sec 5.2.1.1 Eqn 5.1 / IS 3043:1987 Cl.8.3 (in metre units).",
+            f"Re_single = {Re_rod_single:.4f} ohm. For {N_rods} grid rods in parallel: Re_grid = {Re_grid_rods:.4f} ohm."
+        )
+
+        if has_pits:
+            sec("4.4 Separate Earth Pit Resistance")
+            fb(
+                "Re_pits = (1/N_pits) x [ (100 x rho_cm) / (2 x pi x L_cm) ] x ln(4 x L_cm / d_cm)",
+                {
+                    "N_pits": f"{N_pits} — number of separate earth pits",
+                    "rho (ohm-cm)": f"{rho_cm:.0f}",
+                    "L (cm)": f"{L_pit_cm:.0f} — earth pit electrode length",
+                    "d (cm)": f"{d_pit_cm:.2f} — earth pit electrode diameter",
+                    "Re_single_pit": f"{100*rho_cm/(2*math.pi*L_pit_cm)*math.log(4*L_pit_cm/d_pit_cm):.4f} ohm — one earth pit",
+                    "Re_pits": f"{100*rho_cm/(2*math.pi*L_pit_cm)*math.log(4*L_pit_cm/d_pit_cm):.4f} / {N_pits} = {Re_pits:.4f} ohm — all pits in parallel",
+                },
+                "Separate earth pits are pipe or rod electrodes installed outside the main grid perimeter, typically at specific earthing points for equipment, lightning masts, or fence posts. Connected in parallel with the main grid, they reduce the overall system resistance.",
+                "CBIP Pub.339 Sec 5.2.1.1 Eqn 5.1 / IS 3043:1987 Cl.8.3. Published project calculations use cm unit version as above.",
+                f"Re_pits = {Re_pits:.4f} ohm"
+            )
+
+            sec("4.5 Combined Resistance — Parallel Combination")
+            fb(
+                "Rcombined = Rg x Re_pits / (Rg + Re_pits)",
+                {
+                    "Rg (ohm)": f"{Rg:.4f} — main grid resistance",
+                    "Re_pits (ohm)": f"{Re_pits:.4f} — separate earth pit resistance",
+                    "Numerator": f"{Rg:.4f} x {Re_pits:.4f} = {Rg*Re_pits:.6f}",
+                    "Denominator": f"{Rg:.4f} + {Re_pits:.4f} = {Rg+Re_pits:.4f}",
+                },
+                "The main grid and the separate earth pits form a parallel combination. Two resistances in parallel: R_parallel = R1 x R2 / (R1 + R2). Since Re_pits >> Rg, the combined resistance is only slightly less than Rg alone. Reference values: Rg = 0.10 ohm, Re_pits = 28.21 ohm, Rcombined = 0.09 ohm.",
+                "Standard parallel resistance formula.",
+                f"Rcombined = {Rg:.4f} x {Re_pits:.4f} / ({Rg:.4f} + {Re_pits:.4f}) = {Rcomb:.4f} ohm"
+            )
+            (rpass if Rcomb<=1.0 else rfail)(
+                f"Combined earth resistance Rcombined = {Rcomb:.4f} ohm. {'Less than 1.0 ohm. Acceptable.' if Rcomb<=1.0 else 'Exceeds 1.0 ohm.'}"
+            )
+
+        sec("4.6 Ground Potential Rise — GPR (CBIP Sec 3.5)")
+        fb(
+            "GPR = IG x Rg",
+            {
+                "GPR (V)": "Maximum voltage of earthing grid relative to remote earth during fault",
+                "IG (A)": f"{IG:.0f} A = {IG_kA:.4f} kA",
+                "Rg (ohm)": f"{Rg:.4f} ohm",
+                "Physical meaning": "The entire grid and everything connected to it (all equipment bodies, control panels, fence) rises to GPR volts above remote earth during the fault.",
+                "Maximum transferred potential": f"GPR = {GPR:.2f} V — any metallic conductor leaving the station can carry this to remote areas",
+            },
+            "When IG amperes flow from the grid into the soil, the grid voltage rises above remote earth by GPR = IG x Rg. IEEE 80-2013 Sec 15.1: If GPR is less than the permissible touch voltage, no further analysis is needed.",
+            "CBIP Pub.339 Sec 3.5 and 3.7. IEEE Std 80-2013.",
+            f"GPR = {IG:.0f} x {Rg:.4f} = {GPR:.2f} V = {GPR/1000:.4f} kV"
+        )
+
+        mcards([
+            ("Grid Rg", f"{Rg:.4f}", "ohm", "ps" if rg_ok else "wn"),
+            ("Earth Pits Re", f"{Re_pits:.4f}" if Re_pits else "N/A", "ohm", "bl"),
+            ("Rcombined", f"{Rcomb:.4f}", "ohm", "ps" if Rcomb<=1.0 else "wn"),
+            ("Grid Current IG", f"{IG:.0f}", "A", "bl"),
+            ("GPR", f"{GPR:.2f}", "V", "bl"),
+            ("GPR", f"{GPR/1000:.4f}", "kV", "bl"),
+        ], cols=3)
+
+        if GPR > Etouch:
+            rnote(f"GPR = {GPR:.2f} V exceeds permissible Etouch = {Etouch:.2f} V. This is normal for large substations. It does NOT mean the design is unsafe — it means the full Em and Es analysis in Phase 5 is required. The actual mesh voltage Em is typically much less than GPR because the surface potential profile distributes the voltage. Reference: GPR = 2800V, Etouch permissible = 732V, but actual Em = 406V which is safe.")
+        else:
+            rpass(f"GPR = {GPR:.2f} V is less than Etouch permissible = {Etouch:.2f} V. Design is inherently safe per IEEE 80 Sec 15.1. Phase 5 verification is still recommended.")
+
+        rinfo("Why Increasing Conductor Length Alone Cannot Reduce Rg Significantly: CBIP Sec 3.11.1 — The first term rho/Lt shows that doubling Lt halves this term. But the second term (area term) dominates for large grids. Increasing area A is far more effective. To halve Rg, double the grid area.")
+        rinfo("Transferred Potential Hazard: Any metallic conductor connected to the grid and going outside the station — cable sheaths, water pipes, telecom cables, rails — carries GPR to remote areas where gravel is not present and permissible limits are much lower. CBIP Sec 5.3.10: Use isolating transformers on telecom, insulating joints on pipes, optical fibre where possible.")
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# PHASE 5 — VERIFICATION
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+with t_p5:
+    phase(5, "Final Verification — Actual Mesh Voltage and Step Voltage")
+    rinfo("Phase 5 calculates the actual worst-case touch and step voltages that exist in the grid. These are the Em (mesh voltage, worst at corner meshes) and Es (step voltage, worst just outside grid corners). Both must be below the permissible limits from Phase 3.")
+    sp(0.3)
+
+    col1, col2 = st.columns([1,1], gap="large")
+    with col1:
+        sec("5.1 Geometric Factors — Definitions and Derivation")
+        st.markdown("""
+        <div class="card" style="font-size:0.79rem;color:#1a2e40;line-height:1.82">
+        <b>Why are geometric factors needed?</b><br>
+        The current dissipation from the grid is not uniform. Conductors at the periphery
+        dissipate more current than those at the centre. Corner meshes have higher mesh
+        voltages than central meshes. The geometric factors capture this non-uniformity.<br><br>
+        <b>n — Effective number of parallel conductors:</b><br>
+        n = na x nb x nc x nd. For rectangular grids nc = nd = 1.<br>
+        na = 2Lc/Lp captures how many conductors span the grid width relative to perimeter.<br>
+        nb captures the effect of grid shape (how square vs rectangular it is).<br>
+        A higher n means more conductors, which distributes current more uniformly
+        and reduces the peak mesh voltage.<br><br>
+        <b>Km — Mesh voltage spacing factor:</b><br>
+        Km depends on mesh spacing D, burial depth h, and conductor diameter d.
+        Larger D = larger meshes = higher Km = higher Em. Deeper burial = lower Km.
+        Reducing D is the primary way to reduce Em.<br><br>
+        <b>Ks — Step voltage spacing factor:</b><br>
+        Ks depends on h, D, and n. It governs the step voltage at the grid periphery.
+        </div>""", unsafe_allow_html=True)
+
+        st.markdown(f"""<table class="dt">
+        <tr><th>Factor</th><th>Formula</th><th>Value</th><th>Reference</th></tr>
+        <tr><td>na</td><td class="mn">2 x Lc / Lp</td>
+            <td class="mn">2 x {Lc:.0f} / {Lp:.0f} = {na:.4f}</td>
+            <td>CBIP Eqn 5.19 / IEEE B.18</td></tr>
+        <tr><td>nb</td><td class="mn">[Lp / (4 sqrt(A))]^0.5</td>
+            <td class="mn">[{Lp:.0f}/(4 x {math.sqrt(A_grid):.3f})]^0.5 = {nb:.4f}</td>
+            <td>CBIP Eqn 5.20</td></tr>
+        <tr><td>nc, nd</td><td class="mn">1.0 (rectangular grid)</td>
+            <td class="mn">1.0</td><td>CBIP Eqn 5.21</td></tr>
+        <tr><td>n = na x nb</td><td class="mn">Effective parallel conductors</td>
+            <td class="mn">{n:.4f}</td><td>CBIP Eqn 5.18 / IEEE B.17</td></tr>
+        <tr><td>ho</td><td class="mn">Reference depth = 1.0 m</td>
+            <td class="mn">1.0 m</td><td>IEEE 80 standard definition</td></tr>
+        <tr><td>Kh = sqrt(1 + h/ho)</td><td class="mn">sqrt(1 + {h}/1)</td>
+            <td class="mn">{Kh:.4f}</td><td>CBIP Eqn 5.17 / IEEE B.14</td></tr>
+        <tr><td>Kii</td><td class="mn">1.0 (rods in corners and periphery)</td>
+            <td class="mn">1.0</td><td>CBIP Eqn 5.16</td></tr>
+        <tr><td>Ki = Kim = Kis</td><td class="mn">0.644 + 0.148 x n</td>
+            <td class="mn">0.644 + 0.148 x {n:.4f} = {Kim:.4f}</td>
+            <td>CBIP Eqn 5.22 / IEEE B.16. Reference: Ki = 3.75 for n=21</td></tr>
+        <tr><td>Km</td><td class="mn">Mesh voltage geometric factor (see below)</td>
+            <td class="mn">{Km:.4f}</td><td>CBIP Eqn 5.14 / IEEE B.13. Reference: Km = 0.562</td></tr>
+        <tr><td>Ks</td><td class="mn">Step voltage geometric factor (see below)</td>
+            <td class="mn">{Ks:.4f}</td><td>CBIP Eqn 5.15 / IEEE B.15. Reference: Ks = 0.220</td></tr>
         </table>""", unsafe_allow_html=True)
 
-        sec("Km — Mesh Voltage Spacing Factor (CBIP Eqn 5.14 / IEEE Eq.81)")
-        fblock(
-            "Km = (1/2pi) x { ln[(D^2 / 16hd) + (D+2h)^2 / (8Dd) - h/(4d)] + (Kii/Kh) x ln[8 / (pi x (2n-1))] }",
+        sec("5.2 Km Formula Detail (CBIP Eqn 5.14 / IEEE Eq.81)")
+        fb(
+            "Km = (1/2pi) x { ln[(D^2/(16hd)) + (D+2h)^2/(8Dd) - h/(4d)] + (Kii/Kh) x ln[8/(pi x (2n-1))] }",
             {
-                "D (m)": f"{D} — mesh spacing between conductors",
+                "D (m)": f"{D} — mesh spacing",
                 "h (m)": f"{h} — burial depth",
-                "d (m)": f"{d_c:.4f} — conductor diameter ({d_c_mm:.0f} mm)",
-                "D^2 / (16hd)": f"{D**2:.1f} / (16 x {h} x {d_c:.4f}) = {D**2/(16*h*d_c):.4f}",
-                "(D+2h)^2 / (8Dd)": f"({D+2*h:.1f})^2 / (8 x {D} x {d_c:.4f}) = {(D+2*h)**2/(8*D*d_c):.4f}",
-                "h / (4d)": f"{h} / (4 x {d_c:.4f}) = {h/(4*d_c):.4f}",
-                "Kii/Kh": f"1.0 / {Kh:.4f} = {1/Kh:.4f}",
-                "8/(pi(2n-1))": f"8 / (pi x {2*n-1:.4f}) = {8/(math.pi*(2*n-1)):.6f}",
+                "d (m)": f"{d_c:.4f} — grid conductor diameter = {d_c_mm:.0f}mm",
+                "D^2/(16hd)": f"{D**2:.2f}/(16 x {h} x {d_c:.4f}) = {D**2/(16*h*d_c):.4f}",
+                "(D+2h)^2/(8Dd)": f"({D+2*h:.2f})^2/(8 x {D} x {d_c:.4f}) = {(D+2*h)**2/(8*D*d_c):.4f}",
+                "h/(4d)": f"{h}/(4 x {d_c:.4f}) = {h/(4*d_c):.4f}",
+                "Kii/Kh": f"1.0/{Kh:.4f} = {1/Kh:.4f}",
+                "8/(pi(2n-1))": f"8/(pi x {2*n-1:.4f}) = {8/(math.pi*(2*n-1)):.6f}",
             },
-            "CBIP Pub.339 Eqn 5.14 / IEEE Std 80-2013 Eq.81",
+            "Km is derived from the theory of current flow from a buried conductor into a semi-infinite conducting medium. The first log term captures the geometry of the mesh. The second log term accounts for the irregularity of current distribution and the effect of burial depth on peripheral conductors.",
+            "CBIP Pub.339 Eqn 5.14. IEEE Std 80-2013 Eq.81. Reference calculation: Km = 0.562.",
             f"Km = {Km:.4f}"
         )
 
     with col2:
-        sec("Effective Buried Lengths — CBIP Eqn 5.29 and 5.30")
-        fblock(
-            "Lm = Lc + [1.55 + 1.22 x (lr / Dm)] x Lr   [for rods in corners and along periphery]",
+        sec("5.3 Effective Buried Lengths (CBIP Eqn 5.29 and 5.30)")
+        fb(
+            "Lm = Lc + [ 1.55 + 1.22 x (lr/Dm) ] x Lr   [for rods in corners and periphery]",
             {
-                "Lc (m)": f"{Lc:.0f} — horizontal conductor",
-                "lr (m)": f"{L_rod} — single rod length",
-                "Dm (m)": f"{Dm:.2f} — grid diagonal",
+                "Lc (m)": f"{Lc:.0f} — total horizontal conductor length (from Lt - Lr)",
+                "lr (m)": f"{L_rod} — length of one rod",
+                "Dm (m)": f"{Dm:.2f} — maximum grid diagonal = sqrt(Lx^2 + Ly^2)",
                 "Lr (m)": f"{Lr:.0f} — total rod length = {N_rods} x {L_rod}",
-                "factor": f"1.55 + 1.22 x ({L_rod} / {Dm:.2f}) = {1.55+1.22*L_rod/Dm:.4f}",
+                "Factor [1.55 + 1.22 x lr/Dm]": f"1.55 + 1.22 x ({L_rod}/{Dm:.2f}) = {1.55+1.22*L_rod/Dm:.4f}",
             },
-            "CBIP Pub.339 Eqn 5.29 — for rods on corners and periphery",
+            "Vertical rods contribute to reducing mesh voltage, but not as effectively as horizontal conductors on a metre-for-metre basis. The factor [1.55 + 1.22 x lr/Dm] is an empirical correction that gives the effective equivalent horizontal length of the vertical rods.",
+            "CBIP Pub.339 Eqn 5.29 (for rods in corners and along periphery). IEEE Std 80-2013.",
             f"Lm = {Lc:.0f} + {1.55+1.22*L_rod/Dm:.4f} x {Lr:.0f} = {Lm:.2f} m"
         )
-        fblock(
+        fb(
             "Ls = 0.75 x Lc + 0.85 x Lr",
-            {"Lc (m)": f"{Lc:.0f}", "Lr (m)": f"{Lr:.0f}"},
-            "CBIP Pub.339 Eqn 5.30",
+            {
+                "0.75": "Horizontal conductors contribute 75% to step voltage reduction",
+                "0.85": "Vertical rods contribute 85% to step voltage reduction",
+                "Lc (m)": f"{Lc:.0f}",
+                "Lr (m)": f"{Lr:.0f}",
+            },
+            "The step voltage is most critical at the grid periphery and just outside it. Horizontal conductors contribute somewhat less to step voltage reduction (hence 0.75 vs 1.0 coefficient). Rods at the periphery are highly effective for step voltage (hence 0.85).",
+            "CBIP Pub.339 Eqn 5.30. IEEE Std 80-2013.",
             f"Ls = 0.75 x {Lc:.0f} + 0.85 x {Lr:.0f} = {Ls:.2f} m"
         )
 
-        sec("3.08 Maximum Attainable Mesh Voltage — CBIP Eqn 5.12 / IEEE Eq.85")
-        fblock(
+        sec("5.4 Actual Mesh Voltage Em (CBIP Eqn 5.12 / IEEE Eq.85)")
+        fb(
             "Em = rho x Km x Ki x IG / Lm",
             {
-                "Em (V)": "Actual maximum mesh voltage in the grid (worst case at corner mesh)",
+                "Em (V)": "Actual maximum mesh voltage (worst case at centre of corner mesh)",
                 "rho (ohm-m)": f"{rho}",
-                "Km": f"{Km:.4f}",
-                "Ki = Kim": f"{Kim:.4f}",
+                "Km": f"{Km:.4f} — mesh geometric factor",
+                "Ki = Kim": f"{Kim:.4f} — irregularity factor",
                 "IG (A)": f"{IG:.0f}",
-                "Lm (m)": f"{Lm:.2f}",
+                "Lm (m)": f"{Lm:.2f} — effective buried length for mesh voltage",
             },
-            "CBIP Pub.339 Eqn 5.12 / IEEE Std 80-2013 Eq.85",
+            "Em is the maximum touch voltage that occurs within the grid — it is found at the centre of the corner meshes where the potential is lowest (farthest from any conductor). Reducing D (smaller meshes) directly reduces Em. Reference calculation result: Emesh = 406.64 V.",
+            "CBIP Pub.339 Eqn 5.12. IEEE Std 80-2013 Eq.85.",
             f"Em = {rho} x {Km:.4f} x {Kim:.4f} x {IG:.0f} / {Lm:.2f} = {Em:.2f} V"
         )
-        (res_pass if touch_ok else res_fail)(
-            f"Em = {Em:.2f} V    vs    Etouch permissible = {Etouch:.2f} V    "
-            f"{'Em is less than permissible. Grid design for touch voltage is correct.' if touch_ok else 'Em exceeds permissible. Redesign required — reduce mesh spacing, add conductors, or increase surface layer.'}"
+        (rpass if touch_ok else rfail)(
+            f"Em = {Em:.2f} V  vs  Etouch permissible = {Etouch:.2f} V  —  "
+            f"{'Em is LESS THAN permissible. Grid design for touch voltage is CORRECT. (Reference: Em = 406.64V < 732.80V)' if touch_ok else 'Em EXCEEDS permissible. REDESIGN REQUIRED. Reduce mesh spacing D or add conductors.'}"
         )
 
-        sec("3.09 Maximum Attainable Step Voltage — CBIP Eqn 5.13 / IEEE Eq.92")
-        fblock(
+        sec("5.5 Actual Step Voltage Es (CBIP Eqn 5.13 / IEEE Eq.92)")
+        fb(
             "Es = rho x Ks x Ki x IG / Ls",
             {
                 "Es (V)": "Actual maximum step voltage (worst case just outside corner of grid)",
                 "rho (ohm-m)": f"{rho}",
-                "Ks": f"{Ks:.4f}",
+                "Ks": f"{Ks:.4f} — step voltage geometric factor",
                 "Ki = Kis": f"{Kis:.4f}",
                 "IG (A)": f"{IG:.0f}",
-                "Ls (m)": f"{Ls:.2f}",
+                "Ls (m)": f"{Ls:.2f} — effective buried length for step voltage",
             },
-            "CBIP Pub.339 Eqn 5.13 / IEEE Std 80-2013 Eq.92",
+            "Es is the maximum step voltage — it occurs just outside and at a corner of the grid where the potential gradient on the earth surface is steepest. Peripheral rods reduce Es by diverting current to deeper soil layers. Reference calculation result: Estep = 159.11 V.",
+            "CBIP Pub.339 Eqn 5.13. IEEE Std 80-2013 Eq.92.",
             f"Es = {rho} x {Ks:.4f} x {Kis:.4f} x {IG:.0f} / {Ls:.2f} = {Es:.2f} V"
         )
-        (res_pass if step_ok else res_fail)(
-            f"Es = {Es:.2f} V    vs    Estep permissible = {Estep_perm:.2f} V    "
-            f"{'Es is less than permissible. Grid design for step voltage is correct.' if step_ok else 'Es exceeds permissible. Redesign required — add peripheral rods, gradient control conductors, or extend grid.'}"
+        (rpass if step_ok else rfail)(
+            f"Es = {Es:.2f} V  vs  Estep permissible = {Estep_perm:.2f} V  —  "
+            f"{'Es is LESS THAN permissible. Grid design for step voltage is CORRECT. (Reference: Es = 159.11V < 2438.13V)' if step_ok else 'Es EXCEEDS permissible. REDESIGN REQUIRED. Add peripheral rods or gradient control conductors.'}"
         )
 
         mcards([
-            ("Mesh Voltage Em", f"{Em:.2f}", "V", "pass" if touch_ok else "fail"),
-            ("Etouch permissible", f"{Etouch:.2f}", "V", "blue"),
-            ("Step Voltage Es", f"{Es:.2f}", "V", "pass" if step_ok else "fail"),
-            ("Estep permissible", f"{Estep_perm:.2f}", "V", "blue"),
+            ("Mesh Voltage Em", f"{Em:.2f}", "V", "ps" if touch_ok else "fl"),
+            ("Etouch permissible", f"{Etouch:.2f}", "V", "bl"),
+            ("Step Voltage Es", f"{Es:.2f}", "V", "ps" if step_ok else "fl"),
+            ("Estep permissible", f"{Estep_perm:.2f}", "V", "bl"),
         ])
 
-        info("CBIP Ch.11 Table 11.5: Empirical formula results may differ from computer simulation by approximately 15%. For large and complex grids or non-uniform soil, use CBIP earthing analysis software for the final design. The empirical formulas are adequate for initial design and verification.")
+        rinfo("CBIP Ch.11 Table 11.5: Empirical formula results can differ from computer simulation by approximately 15-20%. CBIP software (gridi) and rigorous algorithms (Heppe's method) give more accurate results. The empirical formulas (IEEE/CBIP) are appropriate for initial design and for grids with uniform conductor spacing in uniform soil.")
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# TAB 6 — FINAL ASSESSMENT
+# FINAL ASSESSMENT
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-with t6:
+with t_fa:
     if all_safe:
-        res_pass(
-            f"3.12 DESIGN IS SAFE. A safe design of the subsoil ground grid has been obtained. "
-            f"Mesh voltage Em = {Em:.2f} V is less than permissible Etouch = {Etouch:.2f} V. "
-            f"Step voltage Es = {Es:.2f} V is less than permissible Estep = {Estep_perm:.2f} V."
-        )
+        rpass(f"DESIGN IS SAFE — A safe design of the subsoil earth grid has been obtained. Mesh voltage Em = {Em:.2f} V is less than permissible Etouch = {Etouch:.2f} V. Step voltage Es = {Es:.2f} V is less than permissible Estep = {Estep_perm:.2f} V. Reference values from published calculations: Em = 406.64V less than 732.80V, Es = 159.11V less than 2438.13V.")
     else:
-        res_fail(
-            f"3.12 DESIGN REQUIRES REVISION. One or more safety criteria are not satisfied. "
-            f"Review items marked FAIL in the summary table and implement the corrective measures listed below."
-        )
+        rfail(f"DESIGN REQUIRES REVISION — One or more safety criteria are not satisfied. Review items marked FAIL below and implement corrective measures.")
 
     sp(0.5)
-    col1, col2 = st.columns([1.2, 0.8], gap="large")
-
+    col1, col2 = st.columns([1.15, 0.85], gap="large")
     with col1:
-        sec("3.12 Final Design Summary Table")
+        sec("Final Design Summary Table")
 
-        def srow(item, unit, allowable, actual, status):
-            sc = "pass" if status == "PASS" else ("fail" if status == "FAIL" else "note")
-            return f"<tr><td>{item}</td><td class='mono'>{unit}</td><td class='mono'>{allowable}</td><td class='mono'>{actual}</td><td class='{sc}'>{status}</td></tr>"
+        def sr(item, unit, allow, actual, status):
+            sc = "ps" if status=="PASS" else ("fl" if status=="FAIL" else "nt")
+            return f"<tr><td>{item}</td><td class='mn'>{unit}</td><td class='mn'>{allow}</td><td class='mn'>{actual}</td><td class='{sc}'>{status}</td></tr>"
 
-        st.markdown(f"""<table class="dtable">
-        <tr><th>Item</th><th>Unit</th><th>Allowable / Required</th><th>Actual / Calculated</th><th>Result</th></tr>
-        {srow("Conductor diameter (thermal + corrosion)", "mm", f">= {d_with_corr:.1f}", str(sel_dia), "PASS" if sel_dia >= math.ceil(d_with_corr) else "FAIL")}
-        {srow("Grid resistance Rg", "ohm", "< 1.0", f"{Rg:.4f}", "PASS" if rg_ok else "NOTE")}
-        {srow("Combined earth resistance Rcomb", "ohm", "< 1.0", f"{Rcomb:.4f}", "PASS" if Rcomb <= 1.0 else "NOTE")}
-        {srow("Ground potential rise GPR", "V", "Reference only", f"{GPR:.2f}", "NOTE")}
-        {srow("Permissible body current Ib", "mA", "Calculated", f"{Ib*1000:.3f}", "OK")}
-        {srow("Surface reduction factor Cs", "", "Calculated", f"{Cs:.4f}", "OK")}
-        {srow("Permissible touch voltage Etouch", "V", "Calculated", f"{Etouch:.2f}", "OK")}
-        {srow("Permissible step voltage Estep", "V", "Calculated", f"{Estep_perm:.2f}", "OK")}
-        {srow("Actual mesh voltage Em", "V", f"< {Etouch:.2f}", f"{Em:.2f}", "PASS" if touch_ok else "FAIL")}
-        {srow("Actual step voltage Es", "V", f"< {Estep_perm:.2f}", f"{Es:.2f}", "PASS" if step_ok else "FAIL")}
+        st.markdown(f"""<table class="dt">
+        <tr><th>Item</th><th>Unit</th><th>Allowable</th><th>Actual</th><th>Result</th></tr>
+        {sr("Conductor diameter (thermal + corrosion)", "mm", f"min {d_corr:.1f}", str(sel_dia), "PASS" if sel_dia>=math.ceil(d_corr) else "FAIL")}
+        {sr("Grid resistance Rg", "ohm", "less than 1.0", f"{Rg:.4f}", "PASS" if rg_ok else "NOTE")}
+        {sr("Combined earth resistance Rcombined", "ohm", "less than 1.0", f"{Rcomb:.4f}", "PASS" if Rcomb<=1.0 else "NOTE")}
+        {sr("Ground potential rise GPR", "V", "Reference only", f"{GPR:.2f}", "NOTE")}
+        {sr("Permissible body current Ib", "mA", "Calculated", f"{Ib*1000:.3f}", "OK")}
+        {sr("Surface reduction factor Cs", "—", "Calculated", f"{Cs:.4f}", "OK")}
+        {sr("Permissible touch voltage Etouch", "V", "Calculated", f"{Etouch:.2f}", "OK")}
+        {sr("Permissible step voltage Estep", "V", "Calculated", f"{Estep_perm:.2f}", "OK")}
+        {sr("Actual mesh voltage Em", "V", f"less than {Etouch:.2f}", f"{Em:.2f}", "PASS" if touch_ok else "FAIL")}
+        {sr("Actual step voltage Es", "V", f"less than {Estep_perm:.2f}", f"{Es:.2f}", "PASS" if step_ok else "FAIL")}
         </table>""", unsafe_allow_html=True)
+
+        if not touch_ok or not step_ok or not rg_ok:
+            sec("Corrective Measures — Based on CBIP Chapter 5, 6, and 11")
 
         if not touch_ok:
-            sec("Corrective Measures — Mesh Voltage Exceeds Permissible")
+            st.markdown("<p style='font-size:0.78rem;font-weight:700;color:#7b1818;margin:0.7rem 0 0.3rem 0'>Mesh Voltage Em exceeds Etouch permissible — Actions Required:</p>", unsafe_allow_html=True)
             for fix in [
-                "Reduce mesh spacing D — add more parallel conductors in X and Y direction. This is the most effective measure for reducing Em. CBIP Sec 5.3.5.",
-                "Use non-uniform conductor spacing — place conductors closer together at the grid corners and periphery, wider at the centre. CBIP Sec 11.3.2 shows this reduces Em by up to 43 percent compared to uniform spacing.",
-                "Increase burial depth h — reduces Km factor and therefore Em.",
-                "Apply Bentonite clay or concrete encasing around horizontal conductors. CBIP Sec 11.5.3.",
-                "Install a counterpoise mat at shallow depth (0.3m) in addition to the main grid. CBIP Sec 11.5.5.",
-                "Increase surface layer thickness hs or use material with higher resistivity rho_s — raises the permissible Etouch limit.",
-            ]:
-                info(fix)
+                "Reduce mesh spacing D — add more parallel conductors in X and Y directions. This is the most effective measure. Reducing D from 10m to 7.5m adds about 33% more conductor and significantly reduces Em. CBIP Sec 5.3.5.",
+                "Use non-uniform conductor spacing — place conductors closer at grid corners and periphery, wider at centre. CBIP Sec 11.3.2 shows Em can be reduced by 43 percent this way. Empirical formulas cannot analyse this — computer simulation needed.",
+                "Increase burial depth h — deeper burial reduces Km factor and therefore Em. From 0.6m to 1.0m gives measurable improvement.",
+                "Apply Bentonite clay or concrete encasing around horizontal conductors — effectively increases the conductor radius d which enters the Km formula, reducing Km. CBIP Sec 11.5.3: Em reduced from 1076V to 672V in one example.",
+                "Install a counterpoise mat at shallow depth (0.3m) in addition to the main grid — the dense shallow mat equalizes surface potential locally. CBIP Sec 11.5.5.",
+                "Increase surface layer thickness hs or verify rho_s value — raises the permissible Etouch limit.",
+            ]: rinfo(fix)
 
         if not step_ok:
-            sec("Corrective Measures — Step Voltage Exceeds Permissible")
+            st.markdown("<p style='font-size:0.78rem;font-weight:700;color:#7b1818;margin:0.7rem 0 0.3rem 0'>Step Voltage Es exceeds Estep permissible — Actions Required:</p>", unsafe_allow_html=True)
             for fix in [
-                "Add more vertical rods along the grid periphery — diverts fault current to deeper soil layers and reduces surface gradient at the grid edge. CBIP Sec 5.3.5.1.",
-                "Increase the burial depth of the outermost perimeter conductor — reduces Ks factor. CBIP Sec 11.2.4g.",
-                "Install gradient control rings — horizontal conductors buried outside the fence at progressively increasing depths. CBIP Sec 11.5.2 example shows Es reduced from 2602V to 726V.",
-                "Extend the grid area 1 to 2 metres beyond the station fence boundary. CBIP Sec 5.3.9.",
-                "Spread crushed rock surface layer at least 1 metre outside the perimeter fence.",
-            ]:
-                info(fix)
+                "Add more vertical rods along the grid periphery — diverts current to deeper, more moist soil layers, reducing surface gradients at the grid edge. CBIP Sec 5.3.5.1.",
+                "Increase burial depth of outermost perimeter conductor — reduces Ks. CBIP Sec 11.2.4g: Increasing depth from 0.6m to 2.0m reduced Es from 495V to 230V in the reference example.",
+                "Install gradient control rings — horizontal conductors buried outside the fence at progressively increasing depths. CBIP Sec 11.5.2: Es reduced from 2602V to 726V in reference example.",
+                "Extend the grid 1 to 2 metres beyond the station fence boundary. CBIP Sec 5.3.9.",
+                "Spread crushed rock surface layer at least 1 metre outside the fence — raises Estep permissible for the outer area.",
+            ]: rinfo(fix)
 
         if not rg_ok:
-            sec("Corrective Measures — Grid Resistance Exceeds 1.0 ohm")
+            st.markdown("<p style='font-size:0.78rem;font-weight:700;color:#7b1818;margin:0.7rem 0 0.3rem 0'>Grid Resistance Rg exceeds 1.0 ohm — Actions Required:</p>", unsafe_allow_html=True)
             for fix in [
-                "Increase the grid area — the most effective measure. Rg is approximately proportional to rho divided by sqrt(A). CBIP Sec 3.11.1.",
-                "Use soil resistivity enhancement material around vertical rods: Bentonite clay, coke dust, or conductive cement. CBIP Sec 6.3.1.1.",
-                "Install deep-driven rods (30 to 40m depth) that penetrate a lower-resistivity stratum. CBIP Sec 11.5.4.",
-                "Satellite earth electrode — a separate grid at a distance connected by a buried cable. CBIP Sec 11.5.7.",
-            ]:
-                info(fix)
+                "Increase grid area — the most effective measure. Rg is approximately proportional to rho/sqrt(A). Doubling area reduces Rg by approximately 30%. CBIP Sec 3.11.1: Adding conductor at constant area has minimal effect on Rg.",
+                "Soil enhancement around rods: Bentonite clay (rho = 8.7 ohm-m at water:Bentonite = 4:1 ratio), coke dust, or conductive cement reduces effective rho near rods. CBIP Sec 6.3.1.1.",
+                "Deep driven rods (30-40m depth) penetrating a lower-resistivity stratum — very effective in two-layer soil where bottom layer has low rho. CBIP Sec 11.5.4.",
+                "Satellite earth electrode — a separate earth grid at a distance from the main station, connected by a buried cable. CBIP Sec 11.5.7.",
+            ]: rinfo(fix)
 
     with col2:
-        sec("Input Data Summary")
-        st.markdown(f"""<table class="dtable">
-        <tr><th>Parameter</th><th>Value</th></tr>
-        <tr><td>Project</td><td class="mono">{project_name}</td></tr>
-        <tr><td>Fault current If</td><td class="mono">{If_kA} kA</td></tr>
-        <tr><td>Grid current IG</td><td class="mono">{IG:.0f} A = {IG_kA:.4f} kA</td></tr>
-        <tr><td>Soil resistivity rho</td><td class="mono">{rho} ohm-m</td></tr>
-        <tr><td>Grid area</td><td class="mono">{Lx:.0f} x {Ly:.0f} m = {A_grid:.0f} m2</td></tr>
-        <tr><td>Mesh spacing D</td><td class="mono">{D} m</td></tr>
-        <tr><td>Burial depth h</td><td class="mono">{h} m</td></tr>
-        <tr><td>Total conductor Lt</td><td class="mono">{Lt:.0f} m</td></tr>
-        <tr><td>Ground rods</td><td class="mono">{N_rods} nos x {L_rod} m</td></tr>
-        <tr><td>Conductor selected</td><td class="mono">{sel_dia} mm dia</td></tr>
-        <tr><td>Rg</td><td class="mono">{Rg:.4f} ohm</td></tr>
-        <tr><td>GPR</td><td class="mono">{GPR:.2f} V</td></tr>
-        <tr><td>Cs</td><td class="mono">{Cs:.4f}</td></tr>
-        <tr><td>Etouch permissible</td><td class="mono">{Etouch:.2f} V</td></tr>
-        <tr><td>Estep permissible</td><td class="mono">{Estep_perm:.2f} V</td></tr>
-        <tr><td>Em actual</td><td class="mono">{Em:.2f} V</td></tr>
-        <tr><td>Es actual</td><td class="mono">{Es:.2f} V</td></tr>
+        sec("Complete Input and Output Summary")
+        st.markdown(f"""<table class="dt">
+        <tr><th colspan="2">Project and System</th></tr>
+        <tr><td>Project</td><td class="mn">{proj}</td></tr>
+        <tr><td>System voltage</td><td class="mn">{volt}</td></tr>
+        <tr><th colspan="2">Phase 1 Inputs</th></tr>
+        <tr><td>Fault current If</td><td class="mn">{If_kA} kA</td></tr>
+        <tr><td>Fault duration tf</td><td class="mn">{tf_val} s</td></tr>
+        <tr><td>Shock duration ts</td><td class="mn">{ts_val} s</td></tr>
+        <tr><td>Sf (division factor)</td><td class="mn">{Sf}</td></tr>
+        <tr><td>Df (decrement factor)</td><td class="mn">{Df}</td></tr>
+        <tr><td>Soil resistivity rho</td><td class="mn">{rho} ohm-m</td></tr>
+        <tr><td>Surface rho_s / hs</td><td class="mn">{rho_s} ohm-m / {h_s} m</td></tr>
+        <tr><th colspan="2">Phase 2 Results</th></tr>
+        <tr><td>Conductor area (IEEE)</td><td class="mn">{A_ieee:.2f} mm2</td></tr>
+        <tr><td>Corrosion class / allowance</td><td class="mn">{corr_cls.split('/')[0].strip()} / +{corr_mm}mm</td></tr>
+        <tr><td>Selected conductor</td><td class="mn">{sel_dia} mm dia ({sel_area:.1f} mm2)</td></tr>
+        <tr><td>Grid area Lx x Ly</td><td class="mn">{Lx:.0f} x {Ly:.0f} = {A_grid:.0f} m2</td></tr>
+        <tr><td>Mesh spacing D</td><td class="mn">{D} m</td></tr>
+        <tr><td>Burial depth h</td><td class="mn">{h} m</td></tr>
+        <tr><td>Total conductor Lt</td><td class="mn">{Lt:.0f} m</td></tr>
+        <tr><td>Ground rods</td><td class="mn">{N_rods} x {L_rod} m = {Lr:.0f} m total</td></tr>
+        <tr><th colspan="2">Phase 3 Safety Limits</th></tr>
+        <tr><td>Body current Ib</td><td class="mn">{Ib*1000:.3f} mA</td></tr>
+        <tr><td>Cs factor</td><td class="mn">{Cs:.4f}</td></tr>
+        <tr><td>Etouch permissible</td><td class="mn">{Etouch:.2f} V</td></tr>
+        <tr><td>Estep permissible</td><td class="mn">{Estep_perm:.2f} V</td></tr>
+        <tr><th colspan="2">Phase 4 Resistance and GPR</th></tr>
+        <tr><td>Grid resistance Rg</td><td class="mn">{Rg:.4f} ohm</td></tr>
+        <tr><td>Combined Rcombined</td><td class="mn">{Rcomb:.4f} ohm</td></tr>
+        <tr><td>Grid current IG</td><td class="mn">{IG:.0f} A = {IG_kA:.4f} kA</td></tr>
+        <tr><td>GPR</td><td class="mn">{GPR:.2f} V = {GPR/1000:.4f} kV</td></tr>
+        <tr><th colspan="2">Phase 5 Actual Voltages</th></tr>
+        <tr><td>Geometric factors n, Km, Ks</td><td class="mn">n={n:.3f}, Km={Km:.4f}, Ks={Ks:.4f}</td></tr>
+        <tr><td>Eff. lengths Lm / Ls</td><td class="mn">{Lm:.1f} m / {Ls:.1f} m</td></tr>
+        <tr><td>Mesh voltage Em</td><td class="mn {'ps' if touch_ok else 'fl'}">{Em:.2f} V  {'PASS' if touch_ok else 'FAIL'}</td></tr>
+        <tr><td>Step voltage Es</td><td class="mn {'ps' if step_ok else 'fl'}">{Es:.2f} V  {'PASS' if step_ok else 'FAIL'}</td></tr>
         </table>""", unsafe_allow_html=True)
-
-        sec("Note on Number of Rods")
-        info("The number of rods is determined by placing one rod at every N metres along the grid perimeter (Option A in the sidebar). In the GSECL project, 90 rods were used on a perimeter of 1100m — approximately one rod per 12m. Start with a spacing of 10 to 15m and adjust based on results.")
-        info("Rods placed on the periphery are significantly more effective than those placed in the interior. CBIP Sec 5.3.5.1: Rods on the periphery control step voltage at the grid edge and help reduce resistance by dissipating current into deeper soil where moisture content is more stable.")
 
         sec("Equipment Earthing Quick Reference (CBIP + IS 3043)")
         equip = [
-            ("Transformer body", "2 independent leads to different grid nodes — IS 3043 Cl.12"),
-            ("Transformer neutral", "Separate conductor sized for full IG — CBIP Sec 5.2"),
-            ("CT secondary neutral", "Earthed. Primary tank to grid. 50 mm2 min lead."),
-            ("PT / CVT", "Separate quiet earth bus, single-point to main grid — CBIP Ch.7"),
-            ("Lightning arrester LA", "Lead less than 1m, no bends, minimum inductance — IEC 60099"),
-            ("Circuit breaker CB", "All metal parts and mechanism earthed — IS 3043 Cl.13"),
-            ("Station fence", "Bond to grid. Crushed rock 1m outside fence — CBIP Sec 3.12"),
-            ("Control and relay panel", "Single-point earth, separate quiet bus — CBIP Ch.7"),
-            ("Cable sheath and armour", "Bond both ends inside station"),
-            ("Overhead earth wire", "Connect to grid at station entry — CBIP Sec 3.7.2"),
+            ("Transformer body", "Min 2 independent leads to different grid nodes. IS 3043 Cl.12."),
+            ("Transformer neutral", "Separate conductor sized for full IG. CBIP Sec 5.2."),
+            ("CT secondary neutral", "One terminal earthed. Primary tank bonded to grid."),
+            ("Lightning arrester (LA)", "Lead less than 1m, no bends, no loops. Minimum inductance. IEC 60099."),
+            ("Circuit breaker (CB)", "All metal parts and operating mechanism earthed. IS 3043 Cl.13."),
+            ("Station fence", "Bond to grid. Crushed rock 1m outside fence. CBIP Sec 3.12."),
+            ("Control panel", "Separate quiet earth bus. Single-point to main grid. CBIP Ch.7."),
+            ("Lightning mast", "Dedicated down conductor, connected to grid at base. IS 2309."),
+            ("Cable sheath", "Bond both ends inside station. IS 3043."),
+            ("Auxiliary earthmat", "Dense sub-grid under operator standing area. CBIP Sec 5.3.5."),
         ]
-        rows_eq = "".join(
-            f"<tr><td>{e}</td><td style='font-size:0.73rem;color:#5a6a7a;line-height:1.5'>{r}</td></tr>"
-            for e, r in equip
-        )
-        st.markdown(f"""<table class="dtable">
-        <tr><th>Equipment</th><th>Key Requirement</th></tr>
-        {rows_eq}</table>""", unsafe_allow_html=True)
+        rows_e = "".join(f"<tr><td>{e}</td><td style='font-size:0.72rem;color:#1a2e40;line-height:1.5'>{r}</td></tr>" for e,r in equip)
+        st.markdown(f"""<table class="dt">
+        <tr><th>Equipment</th><th>Key Requirement</th></tr>{rows_e}</table>""", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # FOOTER
@@ -1734,15 +1626,16 @@ with t6:
 
 st.markdown("<div style='height:2rem'></div>", unsafe_allow_html=True)
 st.markdown("""
-<div style="border-top:1px solid #d8dde5;padding-top:0.7rem;
-    color:#8a9aaa;font-size:0.69rem;text-align:center;line-height:1.8">
+<div style="border-top:1px solid #cde3f4;padding-top:0.65rem;color:#4a7a9b;
+    font-size:0.68rem;text-align:center;line-height:1.8">
 CBIP Manual Pub.339 (2017 Edition) &nbsp;|&nbsp;
 IS 3043:1987 (Reaffirmed 2006) &nbsp;|&nbsp;
 IEEE Std 80-2013 &nbsp;|&nbsp;
-IS 2309 &nbsp;|&nbsp;
 IEEE Std 665 &nbsp;|&nbsp;
-IEC 62305<br>
-Empirical formula accuracy: approximately plus or minus 20 percent compared to rigorous computer simulation.
-For complex or non-uniform soil conditions, use dedicated earthing analysis software for final design verification.
+IS 2309 &nbsp;|&nbsp;
+IEC 62305 &nbsp;|&nbsp;
+BS 7430:2011<br>
+Empirical formula accuracy: approximately plus or minus 20 percent versus rigorous computer simulation.
+Use CBIP earthing software (gridi) for final verification of complex or non-uniform soil cases.
 </div>
 """, unsafe_allow_html=True)
