@@ -27,7 +27,7 @@ st.markdown("""
     font-family: 'IBM Plex Sans', 'Segoe UI', Arial, sans-serif !important;
 }
 .main .block-container {
-    background: #f4f6f9;
+    background: #0E1117;
     padding: 1.4rem 1.8rem 3rem 1.8rem;
     max-width: 1480px;
 }
