@@ -31,38 +31,40 @@ st.markdown("""
     padding: 1.4rem 1.8rem 3rem 1.8rem;
     max-width: 1480px;
 }
-
 [data-testid="stSidebar"] {
-    background: #0E1117; /* Ye dark navy blue background hai */
+    background: #0E1117;
     border-right: 1px solid #2c3e50;
 }
 [data-testid="stSidebar"] .block-container { padding: 0.7rem 0.9rem; }
 [data-testid="stSidebar"] label {
-    color: #ffffff !important; /* Text white kar diya taki padhne me aaye */
+    color: #ffffff !important;
     font-size: 0.77rem !important;
     font-weight: 500 !important;
 }
 [data-testid="stSidebar"] p,
-[data-testid="stSidebar"] span,
-[data-testid="stSidebar"] div { color: #d6eaf8 !important; }
-[data-testid="stSidebar"] input {
-    background: #eef6fd !important;
-    color: #1a2e40 !important;
-    border: 1px solid #9ecce8 !important;
-}
-[data-testid="stSidebar"] .stSelectbox > div > div {
-    background: #eef6fd !important;
-    color: #1a2e40 !important;
-    border: 1px solid #9ecce8 !important;
-}
-[data-testid="stSidebar"] .stRadio label { color: #1a2e40 !important; }
 [data-testid="stSidebar"] small,
 [data-testid="stSidebar"] p[data-testid="stMarkdownContainer"] {
-    color: #4a7a9b !important;
+    color: #d6eaf8 !important;
     font-size: 0.71rem !important;
     line-height: 1.5 !important;
 }
-
+[data-testid="stSidebar"] input {
+    background: #eef6fd !important;
+    color: #0E1117 !important;
+    -webkit-text-fill-color: #0E1117 !important;
+    border: 1px solid #9ecce8 !important;
+    font-weight: 500 !important;
+}
+[data-testid="stSidebar"] .stSelectbox > div > div {
+    background: #eef6fd !important;
+    color: #0E1117 !important;
+    border: 1px solid #9ecce8 !important;
+}
+[data-testid="stSidebar"] div[data-baseweb="select"] span {
+    color: #0E1117 !important;
+    font-weight: 500 !important;
+}
+[data-testid="stSidebar"] .stRadio label { color: #ffffff !important; }
 .sb-hdr {
     background: #2980b9;
     margin: 0 -0.9rem 0.9rem -0.9rem;
