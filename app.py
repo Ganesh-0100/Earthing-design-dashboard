@@ -23,7 +23,8 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
-*, *::before, *::after {
+/* Sirf body aur main content par hi font apply karein */
+body, .main, .main * {
     font-family: 'IBM Plex Sans', 'Segoe UI', Arial, sans-serif !important;
 }
 /* Ye line Streamlit ke icons ko theek karne ke liye hai */
