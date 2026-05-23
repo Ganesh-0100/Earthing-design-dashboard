@@ -1060,7 +1060,7 @@ with t_p2:
         <tr><td>Conductor runs in Y</td><td class="mn">n_y = int(Ly/D)+1</td><td class="mn">{n_y} runs</td><td>Calculated from grid dimensions and spacing.</td></tr>
         <tr><td>Estimated horizontal Lc</td><td class="mn">n_x x Ly + n_y x Lx</td><td class="mn">{Lc_est:.0f} m</td><td>Approximate — use actual from drawings for final design.</td></tr>
         <tr><td>Total buried conductor (actual)</td><td class="mn">Lt</td><td class="mn">{Lt:.0f} m</td><td>From detailed layout drawings. Example: 11000m horizontal + 90x3m rods = 11270m.</td></tr>
-        <tr><td>Ground rods (N)</td><td class="mn">N_rods</td><td class="mn">{N_rods}</td><td>{"From perimeter / "+str(rod_sp_peri)+"m spacing = ceil("+str(Lp:.0f)+"/"+str(rod_sp_peri)+")" if N_rods_auto else "Entered from drawings"}</td></tr>
+        <tr><td>Ground rods (N)</td><td class="mn">N_rods</td><td class="mn">{N_rods}</td><td>{f"From perimeter / {rod_sp_peri}m spacing = ceil({Lp:.0f}/{rod_sp_peri})" if N_rods_auto else "Entered from drawings"}</td></tr>
         <tr><td>Total rod length</td><td class="mn">Lr = N x L</td><td class="mn">{Lr:.0f} m</td><td>Calculated.</td></tr>
         <tr><td>Horizontal conductor (derived)</td><td class="mn">Lc = Lt - Lr</td><td class="mn">{Lc:.0f} m</td><td>Calculated from Lt and Lr.</td></tr>
         </table>""", unsafe_allow_html=True)
