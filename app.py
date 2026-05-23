@@ -1,5 +1,5 @@
 """
-Earthing System Design Calculator
+Earthing System Design
 Phase-wise Calculation with Full Formula Derivation and Engineering Reasoning
 
 Reference Standards:
@@ -78,15 +78,15 @@ st.markdown("""
 }
 
 .pg-hdr {
-    background: #2980b9;
+    background: #5DADE2; 
     border-left: 4px solid #e74c3c;
     padding: 1.1rem 1.5rem;
     border-radius: 3px;
     margin-bottom: 1.3rem;
 }
 .pg-hdr-t { font-size:0.98rem; font-weight:700; color:#ffffff; text-transform:uppercase; letter-spacing:0.05em; margin:0; }
-.pg-hdr-s { font-size:0.71rem; color:#d6eaf8; margin-top:0.22rem; line-height:1.5; }
-.pg-hdr-p { font-size:0.77rem; color:#ebf5fb; margin-top:0.4rem; font-weight:500; }
+.pg-hdr-s { font-size:0.71rem; color:#ffffff; margin-top:0.22rem; line-height:1.5; }
+.pg-hdr-p { font-size:0.77rem; color:#ffffff; margin-top:0.4rem; font-weight:500; }
 
 .stTabs [data-baseweb="tab-list"] {
     background:#ffffff; border-bottom:2px solid #9ecce8; padding:0; gap:0;
