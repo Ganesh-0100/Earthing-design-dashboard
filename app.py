@@ -443,6 +443,7 @@ Rg    = rho*(1.0/Lt + (1.0/s20A)*(1.0+1.0/(1.0+h*s20_A)))
 Lcm   = L_rod*100.0
 d_rcm = d_rod
 rho_c = rho*100.0
+rho_cm = rho*100.0
 Re_rod_single = (100.0*rho_c)/(2.0*math.pi*Lcm) * math.log(4.0*Lcm/d_rcm)
 Re_grid_rods  = Re_rod_single / N_rods
 
